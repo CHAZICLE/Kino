@@ -84,14 +84,14 @@ public class Entity {
 							
 							if(n!=null && n.dot(motion)<0)
 							{
-								if(motion.getMagnitudeSquared()>0.1)
+								//if(motion.getMagnitudeSquared()>0.1)
 									motion = motion.reflect(n);
-								else
-									motion = motion.flatten(n);
-								if(clip.motion.getMagnitudeSquared()>0.1)
+								//else
+									//motion = motion.flatten(n);
+								//if(clip.motion.getMagnitudeSquared()>0.1)
 									clip.motion = clip.motion.reflect(n);
-								else
-									clip.motion = clip.motion.flatten(n);
+								//else
+									//clip.motion = clip.motion.flatten(n);
 								
 								double Va = 0;
 								double Ua = motion.getMagnitude();
