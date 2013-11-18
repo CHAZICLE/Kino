@@ -29,6 +29,26 @@ public class Entity {
 	public double mass = 1;
 	public double vertRot = 0;
 	public double horzRot = 0;
+	
+	private double E = 0;
+	/*
+	 * Collision Stages:
+	 * Va*Ma+Vb*Mb=Ua*Ma+Ub*Mb
+	 * Vb=Va+E(Ub-Ua)
+	 * 
+	 * Find Va:
+	 * Va=(Ua*Ma+Ub*Mb)/(Ma+Mb+E*Mb*(Ub-Ua))
+	 * 
+	 * Vb=(Ub*Mb+Ua*Ma)/(Mb+Ma+E*Ma*(Ua-Ub))
+	 * 
+	 * E:
+	 * 0-1 - Perfectly Elastic
+	 *   0 - Stop
+	 *-1-0 - Reverse Collision
+	 * 
+	 * 
+	 * 
+	 */
 	/**
 	 * Tick the entities position and motion values<br />
 	 * - Adds gravity to momentum<br />
@@ -68,11 +88,27 @@ public class Entity {
 									motion = motion.reflect(n);
 								else
 									motion = motion.flatten(n);
+								if(clip.motion.getMagnitudeSquared()>0.1)
+									clip.motion = clip.motion.reflect(n);
+								else
+									clip.motion = clip.motion.flatten(n);
 								
-								motion.store();
+								double Va = 0;
+								double Ua = motion.getMagnitude();
+								double Vb = 0;
+								double Ub = clip.motion.getMagnitude();
+								double Ma = mass;
+								double Mb = clip.mass;
+								Va=(Ua*Ma+Ub*Mb)/(Ma+Mb+E*Mb*(Ub-Ua));
+								Vb=(Ub*Mb+Ua*Ma)/(Mb+Ma+E*Ma*(Ua-Ub));
+								
+								motion.setMagnitude(Va);
+								clip.motion.setMagnitude(Vb);
+								
+								/*motion.store();
 								clip.motion.add(motion.multiply(-mass/clip.mass));
 								motion.load();
-								motion.multiply(clip.mass/mass);
+								motion.multiply(clip.mass/mass);*/
 								
 								movement = !GUIGame.freezeme;
 								/*n = debugBoundingBox.getCollisionBoundaryVector(clip.debugBoundingBox);

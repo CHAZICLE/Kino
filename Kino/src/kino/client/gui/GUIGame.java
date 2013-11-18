@@ -36,7 +36,7 @@ public class GUIGame extends GUI {
 		smallSphere.collider = true;
 		smallSphere.mass = 1;
 		
-		smallCube = new BBRenderDebug.Cube(1,1,1);
+		smallCube = new BBRenderDebug.Sphere(1);
 		smallCube.render = true;
 		smallCube.movement = true;
 		smallCube.gravity = true;
