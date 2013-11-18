@@ -24,8 +24,8 @@ public class Entity {
 	public boolean gravity = false;
 	
 	public World world;
-	public Vector3d position = new Vector3d(0,0,0);
-	public Vector3d motion = new Vector3d(0,0,0);
+	public Vector3d position = new Vector3d();
+	public Vector3d motion = new Vector3d();
 	public double mass = 1;
 	public double vertRot = 0;
 	public double horzRot = 0;
@@ -84,14 +84,14 @@ public class Entity {
 							
 							if(n!=null && n.dot(motion)<0)
 							{
-								//if(motion.getMagnitudeSquared()>0.1)
+								/*if(motion.getMagnitudeSquared()>0.1)
 									motion = motion.reflect(n);
-								//else
-									//motion = motion.flatten(n);
-								//if(clip.motion.getMagnitudeSquared()>0.1)
+								else
+									motion = motion.flatten(n);
+								if(clip.motion.getMagnitudeSquared()>0.1)
 									clip.motion = clip.motion.reflect(n);
-								//else
-									//clip.motion = clip.motion.flatten(n);
+								else
+									clip.motion = clip.motion.flatten(n);*/
 								
 								double Va = 0;
 								double Ua = motion.getMagnitude();
@@ -103,7 +103,10 @@ public class Entity {
 								Vb=(Ub*Mb+Ua*Ma)/(Mb+Ma+E*Ma*(Ua-Ub));
 								
 								motion.setMagnitude(Va);
-								clip.motion.setMagnitude(Vb);
+								motion.store();
+								clip.motion = clip.motion.reflect(n).add(motion.multiply(-1)).setMagnitude(Vb);
+								motion.load();
+								//clip.motion.setMagnitude(Vb);
 								
 								/*motion.store();
 								clip.motion.add(motion.multiply(-mass/clip.mass));
@@ -155,7 +158,6 @@ public class Entity {
 			}*/
 		}
 	}
-	private Vector3d floorNormal = new Vector3d(0,1,0);
 	public void tick()
 	{
 		tickMovement();
