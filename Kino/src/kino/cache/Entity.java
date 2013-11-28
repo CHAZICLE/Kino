@@ -30,7 +30,7 @@ public class Entity {
 	public double vertRot = 0;
 	public double horzRot = 0;
 	
-	private double E = 0;
+	private double E = 1;
 	/*
 	 * Collision Stages:
 	 * Va*Ma+Vb*Mb=Ua*Ma+Ub*Mb
