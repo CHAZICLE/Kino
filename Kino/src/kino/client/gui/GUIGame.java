@@ -119,6 +119,11 @@ public class GUIGame extends GUI {
 			debugMouseWheelControlsPower = !debugMouseWheelControlsPower;
 			System.out.println("Mouse wheel controls "+(debugMouseWheelControlsPower ? "Throw power" : "FOV"));
 		}
+		else if(key==Keyboard.KEY_F8)
+		{
+			kino.world.enableGravity = !kino.world.enableGravity;
+			System.out.println("World gravity "+(kino.world.enableGravity ? "enabled" : "disabled"));
+		}
 		// Throwing from kino
 		else if(key==Keyboard.KEY_R)
 		{
@@ -226,7 +231,7 @@ public class GUIGame extends GUI {
 		if(dw>0)
 		{
 			if(debugMouseWheelControlsPower)
-				throwPower += 0.1;
+				throwPower += 0.01;
 			else
 			{
 				FOV--;
@@ -236,7 +241,7 @@ public class GUIGame extends GUI {
 		else if(dw<0)
 		{
 			if(debugMouseWheelControlsPower)
-				throwPower -= 0.1;
+				throwPower -= 0.01;
 			else
 			{
 				FOV++;

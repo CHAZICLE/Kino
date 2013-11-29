@@ -36,10 +36,8 @@ public class Entity {
 	 * Va*Ma+Vb*Mb=Ua*Ma+Ub*Mb
 	 * Vb=Va+E(Ub-Ua)
 	 * 
-	 * Find Va:
-	 * Va=(Ua*Ma+Ub*Mb)/(Ma+Mb+E*Mb*(Ub-Ua))
-	 * 
-	 * Vb=(Ub*Mb+Ua*Ma)/(Mb+Ma+E*Ma*(Ua-Ub))
+	 * Va*Ma+Vb*Mb=Ua*Ma+Ub*Mb
+	 * Vb=Va+E(Ub-Ua)
 	 * 
 	 * E:
 	 * 0-1 - Perfectly Elastic
@@ -58,7 +56,7 @@ public class Entity {
 	{
 		if(movement)
 		{
-			if(gravity)
+			if(world.gravity!=null && world.enableGravity && gravity)
 			{
 				//motion.add(world.gravity.multiply(mass*mass));
 				//world.gravity.load();
@@ -77,22 +75,13 @@ public class Entity {
 						if(debugBoundingBox.doesCollideWith(clip.debugBoundingBox))
 						{
 							position.swap();
-							clip.debugBoundingBox.update(clip.position);
+							debugBoundingBox.update(position);
 							Vector3d n = debugBoundingBox.getCollisionNormalOf(clip.debugBoundingBox);
 							position.swap();
 							//System.out.println("REFLECTING: "+this+" hitting "+clip+" :: "+n);
 							
 							if(n!=null && n.dot(motion)<0)
 							{
-								/*if(motion.getMagnitudeSquared()>0.1)
-									motion = motion.reflect(n);
-								else
-									motion = motion.flatten(n);
-								if(clip.motion.getMagnitudeSquared()>0.1)
-									clip.motion = clip.motion.reflect(n);
-								else
-									clip.motion = clip.motion.flatten(n);*/
-								
 								double Va = 0;
 								double Ua = motion.getMagnitude();
 								double Vb = 0;
@@ -100,23 +89,22 @@ public class Entity {
 								double Ma = mass;
 								double Mb = clip.mass;
 								Va=(Ua*Ma+Ub*Mb)/(Ma+Mb+E*Mb*(Ub-Ua));
-								Vb=(Ub*Mb+Ua*Ma)/(Mb+Ma+E*Ma*(Ua-Ub));
+								//Vb=(Ub*Mb+Ua*Ma)/(Mb+Ma+E*Ma*(Ua-Ub));
+								Vb=Va+E*(Ub-Ua);
 								
+								
+								//Ua*Ma+Ub*Mb=Va*Ma+Vb*Mb
+								//
+								
+								motion.reflect(n);
+								clip.motion.reflect(n);
+								
+								clip.motion.add(motion);
+								
+								clip.motion.setMagnitude(Vb);
 								motion.setMagnitude(Va);
-								motion.store();
-								clip.motion = clip.motion.reflect(n).add(motion.multiply(-1)).setMagnitude(Vb);
-								motion.load();
-								//clip.motion.setMagnitude(Vb);
-								
-								/*motion.store();
-								clip.motion.add(motion.multiply(-mass/clip.mass));
-								motion.load();
-								motion.multiply(clip.mass/mass);*/
 								
 								movement = !GUIGame.freezeme;
-								/*n = debugBoundingBox.getCollisionBoundaryVector(clip.debugBoundingBox);
-								if(n!=null)
-									position.set(n);*/
 							}
 						}
 					}

@@ -13,6 +13,7 @@ public class World {
 	}
 	private ConcurrentLinkedQueue<Entity> pendingEntities = new ConcurrentLinkedQueue<Entity>();
 	public void addEntity(Entity ent) { pendingEntities.add(ent); }
+	public boolean enableGravity = true;
 	public Vector3d gravity = new Vector3d(0,-0.01,0);
 	public DomainBoundingBox domain = new DomainBoundingBox(-10,-3.1,-10, 10,10,10);
 	
