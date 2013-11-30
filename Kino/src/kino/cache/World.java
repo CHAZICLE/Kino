@@ -33,7 +33,6 @@ public class World {
 			synchronized(eList_clips) { eList_clips.add(ent); }
 		}
 	}
-	private long tick = 0;
 	public void tick()
 	{
 		while(!pendingEntities.isEmpty())
@@ -55,6 +54,5 @@ public class World {
 					it.remove();
 			}
 		}
-		tick++;
 	}
 }

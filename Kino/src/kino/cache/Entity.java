@@ -82,19 +82,12 @@ public class Entity {
 							
 							if(n!=null && n.dot(motion)<0)
 							{
-								double Va = 0;
 								double Ua = motion.getMagnitude();
-								double Vb = 0;
 								double Ub = clip.motion.getMagnitude();
 								double Ma = mass;
 								double Mb = clip.mass;
-								Va=(Ua*Ma+Ub*Mb)/(Ma+Mb+E*Mb*(Ub-Ua));
-								//Vb=(Ub*Mb+Ua*Ma)/(Mb+Ma+E*Ma*(Ua-Ub));
-								Vb=Va+E*(Ub-Ua);
-								
-								
-								//Ua*Ma+Ub*Mb=Va*Ma+Vb*Mb
-								//
+								double Va = (Ua*Ma+Ub*Mb)/(Ma+Mb+E*Mb*(Ub-Ua));
+								double Vb = Va+E*(Ub-Ua);
 								
 								motion.reflect(n);
 								clip.motion.reflect(n);
@@ -122,7 +115,7 @@ public class Entity {
 					{
 						if(motion.getMagnitudeSquared()>0.005)
 						{
-							motion = motion.reflect(n).multiplex(0.7, 0.5, 0.7);
+							motion = motion.reflect(n);
 						}
 						else
 						{
