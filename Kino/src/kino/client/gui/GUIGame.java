@@ -28,31 +28,33 @@ public class GUIGame extends GUI {
 		kino2=new EKino();
 		kino2.render = true;
 		
+		double r = 1;
 		
-		smallSphere=new BBRenderDebug.Sphere(1);
+		smallSphere=new BBRenderDebug.Sphere(r*2);
 		smallSphere.render = true;
 		smallSphere.movement = true;
 		smallSphere.gravity = true;
 		smallSphere.collider = true;
-		smallSphere.mass = 1;
+		smallSphere.mass = 4/3*Math.PI*r*r*r;
 		
-		smallCube = new BBRenderDebug.Sphere(2);
+		r = 2;
+		smallCube = new BBRenderDebug.Sphere(r*2);
 		smallCube.render = true;
 		smallCube.movement = true;
 		smallCube.gravity = true;
 		smallCube.collider = true;
-		smallCube.mass = 2;
+		smallCube.mass = 4/3*Math.PI*r*r*r;
 		
 		
 		largeSphere=new BBRenderDebug.Sphere(10);
 		largeSphere.render = true;
 		largeSphere.collider = true;
-		largeSphere.position.setXYZ(10, 0, 0);
+		largeSphere.position.setXYZ(100, 0, 0);
 		
 		largeCube=new BBRenderDebug.Cube(10,10,10);
 		largeCube.render = true;
 		largeCube.collider = true;
-		largeCube.position.setXYZ(-10, 0, 0);
+		largeCube.position.setXYZ(-100, 0, 0);
 		
 		renderWorld.addEntity(kino);
 		renderWorld.addEntity(kino2);
@@ -124,21 +126,6 @@ public class GUIGame extends GUI {
 			kino.world.enableGravity = !kino.world.enableGravity;
 			System.out.println("World gravity "+(kino.world.enableGravity ? "enabled" : "disabled"));
 		}
-		// Throwing from kino
-		else if(key==Keyboard.KEY_R)
-		{
-			System.out.println("Throwing the small sphere");
-			smallSphere.teleport(controlEntity);
-			smallSphere.movement = true;
-			smallSphere.motion = vectorCache_relativeForward.makeMagnitude(throwPower);
-		}
-		else if(key==Keyboard.KEY_T)
-		{
-			System.out.println("Throwing the small cube");
-			smallCube.teleport(controlEntity);
-			smallCube.movement = true;
-			smallCube.motion = vectorCache_relativeForward.makeMagnitude(throwPower);
-		}
 		// Teleporting large sphere
 		else if(key==Keyboard.KEY_O)
 		{
@@ -153,6 +140,24 @@ public class GUIGame extends GUI {
 		if(key==Keyboard.KEY_ESCAPE)
 			getManager().stackGUI(new GUIEsc(getManager()));
 		return true;
+	}
+	@Override
+	public boolean onMouseUp(int button, int x, int y) {
+		if(button==0)
+		{
+			System.out.println("Throwing the small sphere");
+			smallSphere.teleport(controlEntity);
+			smallSphere.movement = true;
+			smallSphere.motion = vectorCache_relativeForward.makeMagnitude(throwPower);
+		}
+		else if(button==1)
+		{
+			System.out.println("Throwing the small cube");
+			smallCube.teleport(controlEntity);
+			smallCube.movement = true;
+			smallCube.motion = vectorCache_relativeForward.makeMagnitude(throwPower);
+		}
+		return super.onMouseUp(button, x, y);
 	}
 	@Override
 	public void onClose() {
@@ -297,34 +302,36 @@ public class GUIGame extends GUI {
 			vectorCache_relativeUp = vectorCache_relativeRight.crossMake(vectorCache_relativeForward);
 		
 		// Key controls
-		multiplier = (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) ? 8 : 1)*interpolation;
+		multiplier = (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) ? Math.max(10,multiplier+0.8) : 1);
+		
+		double m = multiplier*interpolation;
 		
 		if(Keyboard.isKeyDown(Keyboard.KEY_A))
-			controlEntity.position.add(vectorCache_relativeRight.makeMagnitude(-multiplier));
+			controlEntity.position.add(vectorCache_relativeRight.makeMagnitude(-m));
 		if(Keyboard.isKeyDown(Keyboard.KEY_D))
-			controlEntity.position.add(vectorCache_relativeRight.makeMagnitude(multiplier));
+			controlEntity.position.add(vectorCache_relativeRight.makeMagnitude(m));
 		
 		if(Keyboard.isKeyDown(Keyboard.KEY_SPACE))
 		{
 			if(Keyboard.isKeyDown(Keyboard.KEY_W))
-				controlEntity.position.add(vectorCache_absoluteForward.makeMagnitude(multiplier));
+				controlEntity.position.add(vectorCache_absoluteForward.makeMagnitude(m));
 			if(Keyboard.isKeyDown(Keyboard.KEY_S))
-				controlEntity.position.add(vectorCache_absoluteForward.makeMagnitude(-multiplier));
+				controlEntity.position.add(vectorCache_absoluteForward.makeMagnitude(-m));
 			if(Keyboard.isKeyDown(Keyboard.KEY_Q))
-				controlEntity.position.add(vectorCache_absoluteUp.makeMagnitude(-multiplier));
+				controlEntity.position.add(vectorCache_absoluteUp.makeMagnitude(-m));
 			if(Keyboard.isKeyDown(Keyboard.KEY_E))
-				controlEntity.position.add(vectorCache_absoluteUp.makeMagnitude(multiplier));
+				controlEntity.position.add(vectorCache_absoluteUp.makeMagnitude(m));
 		}
 		else
 		{
 			if(Keyboard.isKeyDown(Keyboard.KEY_W))
-				controlEntity.position.add(vectorCache_relativeForward.makeMagnitude(multiplier));
+				controlEntity.position.add(vectorCache_relativeForward.makeMagnitude(m));
 			if(Keyboard.isKeyDown(Keyboard.KEY_S))
-				controlEntity.position.add(vectorCache_relativeForward.makeMagnitude(-multiplier));
+				controlEntity.position.add(vectorCache_relativeForward.makeMagnitude(-m));
 			if(Keyboard.isKeyDown(Keyboard.KEY_Q))
-				controlEntity.position.add(vectorCache_relativeUp.makeMagnitude(-multiplier));
+				controlEntity.position.add(vectorCache_relativeUp.makeMagnitude(-m));
 			if(Keyboard.isKeyDown(Keyboard.KEY_E))
-				controlEntity.position.add(vectorCache_relativeUp.makeMagnitude(multiplier));
+				controlEntity.position.add(vectorCache_relativeUp.makeMagnitude(m));
 		}
 	}
 }
