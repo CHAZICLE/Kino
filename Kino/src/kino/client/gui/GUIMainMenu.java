@@ -28,7 +28,7 @@ public class GUIMainMenu extends GUI {
 	@Override
 	public void draw(double interpolation) {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		RenderUtils.setup2DProjection(-10f,10f, -10f,10f);
+		RenderUtils.setProjection_2D(-10f,10f, -10f,10f);
 		GL11.glLoadIdentity();
 		GL11.glColor3f(0.0f,0.0f,1.0f);
 		GL11.glLineWidth(1.0f);

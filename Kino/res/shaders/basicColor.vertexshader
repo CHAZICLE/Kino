@@ -1,0 +1,7 @@
+uniform mat4 viewMatrix;
+varying vec4 vertColor;
+
+void main(){
+    gl_Position = gl_ProjectionMatrix*viewMatrix*gl_ModelViewMatrix*gl_Vertex;
+    vertColor = gl_Color;
+}

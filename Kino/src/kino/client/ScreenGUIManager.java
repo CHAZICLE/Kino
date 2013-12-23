@@ -2,6 +2,7 @@ package kino.client;
 
 import kino.client.gui.GUI;
 import kino.client.gui.GUIMainMenu;
+import kino.util.RenderUtils;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
@@ -11,7 +12,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 
-public class ScreenGUIManager extends Thread {
+public class ScreenGUIManager extends Thread implements ScreenGUIHolder {
 	public ScreenGUIManager()
 	{
 		overwriteGUI(new GUIMainMenu(this));
@@ -19,12 +20,14 @@ public class ScreenGUIManager extends Thread {
 	GUI firstGUI;
 	GUI lastGUI;
 	
+	
+	
 	@Override
 	public void run()
 	{
 		startDisplay();
-		WorldRenderer.buildShaders();
-		
+		RenderUtils.preload();
+		WorldRenderer.preload();
 		while(!Thread.interrupted() && !Display.isCloseRequested())
 		{
 			if(firstGUI==null || lastGUI==null)
@@ -58,11 +61,21 @@ public class ScreenGUIManager extends Thread {
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			GUI current = firstGUI;
 			double interpolation = getDelta();
-			do current.draw(interpolation); while((current = current.next)!=null);
+			RenderUtils.useColorShader();
+			do
+			{
+				GL11.glViewport(
+					0,0,
+					Display.getWidth(), Display.getHeight()
+				);
+				current.draw(interpolation);
+			}
+			while((current = current.next)!=null);
 			Display.update();
 		}
-		WorldRenderer.trashShaders();
 		overwriteGUI(null);
+		WorldRenderer.unload();
+		RenderUtils.unload();
 		stopDisplay();
 	}
 	private static long lastTime = 0;
@@ -136,5 +149,13 @@ public class ScreenGUIManager extends Thread {
 	public boolean isSurfaceGUI(GUI gui)
 	{
 		return gui==lastGUI;
+	}
+	@Override
+	public int getWidth() {
+		return Display.getWidth();
+	}
+	@Override
+	public int getHeight() {
+		return Display.getHeight();
 	}
 }

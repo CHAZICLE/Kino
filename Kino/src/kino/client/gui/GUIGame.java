@@ -65,9 +65,7 @@ public class GUIGame extends GUI {
 		
 		
 		controlEntity = renderEntity = kino;
-		
-		middleX = Display.getWidth()/2;
-		middleY = Display.getHeight()/2;
+		RenderUtils.setProjection_3D(FOV, getManager().getWidth()/getManager().getHeight());
 		
 		cache.start();
 	}
@@ -86,8 +84,6 @@ public class GUIGame extends GUI {
 	public Entity smallCube;
 	public Entity largeCube;
 	
-	private int middleX = 0;
-	private int middleY = 0;
 	private int storedX = 0;
 	private int storedY = 0;
 	private boolean recalculate = true;
@@ -168,7 +164,7 @@ public class GUIGame extends GUI {
 		Mouse.setGrabbed(true);
 		storedX = Mouse.getX();
 		storedY = Mouse.getY();
-		Mouse.setCursorPosition(middleX, middleY);
+		Mouse.setCursorPosition(getManager().getWidth()/2, getManager().getHeight()/2);
 		recalculate = true;
 		Display.setResizable(true);
 	}
@@ -182,18 +178,22 @@ public class GUIGame extends GUI {
 	{
 		if(getManager().isSurfaceGUI(this))
 			controlLoop(interpolation);
-		RenderUtils.setup3DProjection(FOV);
+		
+		/* 3D */
+		RenderUtils.sendProjection_3D();
+		if(controlEntity!=renderEntity)//If we're not controlling what we're looking through just render it
+		{
+			RenderUtils.setViewParameters_RenderEntity(
+				renderEntity.position.getX(),
+				renderEntity.position.getY(),
+				renderEntity.position.getZ(),
+				renderEntity.vertRot,
+				renderEntity.horzRot
+			);
+		}
+		RenderUtils.sendViewParameters_RenderEntity();
 		
 		GL11.glLoadIdentity();
-		GL11.glRotated(-renderEntity.vertRot, 1.0f,0.0f,0.0f);
-		GL11.glRotated(180-renderEntity.horzRot, 0.0f,1.0f,0.0f);
-		
-		GL11.glTranslated(
-			-renderEntity.position.getX(),
-			-renderEntity.position.getY(),
-			-renderEntity.position.getZ()
-		);
-		
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		
 		// Debug Rendering
@@ -203,24 +203,19 @@ public class GUIGame extends GUI {
 		RenderDebug.renderFloor();
 		if(debugAxisMarks)
 			RenderDebug.renderAxisGrid();
+		// End Debug Rendering
 		
-		
-		WorldRenderer.render(renderWorld);
+		WorldRenderer.renderWorld(renderWorld);
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		
-		RenderUtils.setup2DProjection(-1f,1f, -1f,1f);
+		
+		/* 2D */
+		RenderUtils.setProjection_2D(-50f,50f,-50f,50f);
+		RenderUtils.sendViewParameters_Normal();
 		GL11.glLoadIdentity();
-		GL11.glColor3f(0.0f,0.0f,1.0f);
-		GL11.glLineWidth(1.0f);
 		
-		GL11.glBegin(GL11.GL_LINES);
-		
-		GL11.glVertex2f(+0.2f,+0.2f);
-		GL11.glVertex2f(-0.2f,-0.2f);
-		GL11.glVertex2f(-0.2f,+0.2f);
-		GL11.glVertex2f(+0.2f,-0.2f);
-		
-		GL11.glEnd();
+		WorldRenderer.renderHUD(renderWorld);
+		RenderDebug.renderCrossHair();
 		
 	}
 	Vector3d vectorCache_relativeRight;
@@ -240,7 +235,7 @@ public class GUIGame extends GUI {
 			else
 			{
 				FOV--;
-				RenderUtils.setup3DProjection(FOV);
+				RenderUtils.setProjection_3D(FOV, Display.getWidth()/Display.getHeight());
 			}
 		}
 		else if(dw<0)
@@ -250,7 +245,7 @@ public class GUIGame extends GUI {
 			else
 			{
 				FOV++;
-				RenderUtils.setup3DProjection(FOV);
+				RenderUtils.setProjection_3D(FOV, Display.getWidth()/Display.getHeight());
 			}
 		}
 			
@@ -258,22 +253,21 @@ public class GUIGame extends GUI {
 		boolean vertChange = recalculate;
 		boolean rightChanged = recalculate;
 		boolean directionChanged = recalculate;
+		boolean controlEntityChanged = recalculate;
 		if(!recalculate) recalculate = false;
 		// Rotation changes
-		if(Mouse.getX()!=middleX)
+		if(Mouse.getX()!=getManager().getWidth()/2)
 		{
-			controlEntity.horzRot = NumericalTools.wrapTo(0, controlEntity.horzRot+MOUSE_SPEED*(middleX-Mouse.getX()), 360);
+			controlEntity.horzRot = NumericalTools.wrapTo(0, controlEntity.horzRot+MOUSE_SPEED*(getManager().getWidth()/2-Mouse.getX()), 360);
 			horzChange = true;
 		}
-		if(Mouse.getY()!=middleY)
+		if(Mouse.getY()!=getManager().getHeight()/2)
 		{
-			controlEntity.vertRot = NumericalTools.capTo(-90, controlEntity.vertRot+MOUSE_SPEED*(Mouse.getY()-middleY), 90);
+			controlEntity.vertRot = NumericalTools.capTo(-90, controlEntity.vertRot-MOUSE_SPEED*(getManager().getHeight()/2-Mouse.getY()), 90);
 			vertChange = true;
 		}
-		if(Mouse.getX()!=middleX || Mouse.getY()!=middleY)
-			Mouse.setCursorPosition(middleX,middleY);
-		
-		
+		if(Mouse.getX()!=getManager().getWidth()/2 || Mouse.getY()!=getManager().getHeight()/2)
+			Mouse.setCursorPosition(getManager().getWidth()/2,getManager().getHeight()/2);
 		if(horzChange)
 		{
 			vectorCache_relativeRight = new Vector3d(
@@ -296,42 +290,82 @@ public class GUIGame extends GUI {
 				Math.cos(Math.toRadians(controlEntity.vertRot)) * Math.cos(Math.toRadians(controlEntity.horzRot))
 			);
 			directionChanged = true;
-			
+			controlEntityChanged = true;
 		}
 		if(directionChanged || rightChanged)
 			vectorCache_relativeUp = vectorCache_relativeRight.crossMake(vectorCache_relativeForward);
 		
+		// TODO: Control manager
 		// Key controls
 		multiplier = (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) ? Math.max(10,multiplier+0.8) : 1);
 		
 		double m = multiplier*interpolation;
-		
 		if(Keyboard.isKeyDown(Keyboard.KEY_A))
+		{
 			controlEntity.position.add(vectorCache_relativeRight.makeMagnitude(-m));
+			controlEntityChanged = true;
+		}
 		if(Keyboard.isKeyDown(Keyboard.KEY_D))
+		{
 			controlEntity.position.add(vectorCache_relativeRight.makeMagnitude(m));
+			controlEntityChanged = true;
+		}
 		
 		if(Keyboard.isKeyDown(Keyboard.KEY_SPACE))
 		{
 			if(Keyboard.isKeyDown(Keyboard.KEY_W))
+			{
 				controlEntity.position.add(vectorCache_absoluteForward.makeMagnitude(m));
+				controlEntityChanged = true;
+			}
 			if(Keyboard.isKeyDown(Keyboard.KEY_S))
+			{
 				controlEntity.position.add(vectorCache_absoluteForward.makeMagnitude(-m));
+				controlEntityChanged = true;
+			}
 			if(Keyboard.isKeyDown(Keyboard.KEY_Q))
+			{
 				controlEntity.position.add(vectorCache_absoluteUp.makeMagnitude(-m));
+				controlEntityChanged = true;
+			}
 			if(Keyboard.isKeyDown(Keyboard.KEY_E))
+			{
 				controlEntity.position.add(vectorCache_absoluteUp.makeMagnitude(m));
+				controlEntityChanged = true;
+			}
 		}
 		else
 		{
 			if(Keyboard.isKeyDown(Keyboard.KEY_W))
+			{
 				controlEntity.position.add(vectorCache_relativeForward.makeMagnitude(m));
+				controlEntityChanged = true;
+			}
 			if(Keyboard.isKeyDown(Keyboard.KEY_S))
+			{
 				controlEntity.position.add(vectorCache_relativeForward.makeMagnitude(-m));
+				controlEntityChanged = true;
+			}
 			if(Keyboard.isKeyDown(Keyboard.KEY_Q))
+			{
 				controlEntity.position.add(vectorCache_relativeUp.makeMagnitude(-m));
+				controlEntityChanged = true;
+			}
 			if(Keyboard.isKeyDown(Keyboard.KEY_E))
+			{
 				controlEntity.position.add(vectorCache_relativeUp.makeMagnitude(m));
+				controlEntityChanged = true;
+			}
+		}
+		if(controlEntityChanged && controlEntity==renderEntity)
+		{
+			RenderUtils.setViewParameters_RenderEntity(
+				renderEntity.position.getX(),
+				renderEntity.position.getY(),
+				renderEntity.position.getZ(),
+				renderEntity.vertRot,
+				renderEntity.horzRot
+			);
 		}
 	}
 }

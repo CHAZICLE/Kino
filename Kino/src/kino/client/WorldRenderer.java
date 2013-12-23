@@ -1,23 +1,19 @@
 package kino.client;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.util.Iterator;
 
 import kino.cache.EKino;
 import kino.cache.Entity;
 import kino.cache.World;
 import kino.test.MRandomTerrain;
+import kino.test.MTestTexturedQuad;
 import kino.util.SelfRenderingEntity;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL20;
 
 public class WorldRenderer {
-	public static void render(World world)
+	public static void renderWorld(World world)
 	{
-		GL20.glUseProgram(shaderProgramID);
 		// Render terrain
 		GL11.glPushMatrix();
 		GL11.glTranslated(0,-6,0);
@@ -49,58 +45,25 @@ public class WorldRenderer {
 				GL11.glPopMatrix();
 			}
 		}
-		GL20.glUseProgram(0);
+	}
+	public static void renderHUD(World world)
+	{
+		textureTest.draw(null);
 	}
 	public static final Model kinoModel = Model.createModelOrNull("./res/model/kino_model.kbm");
 	public static final Model terrainModel = new MRandomTerrain(1000,1000);
+	public static final Model textureTest = new MTestTexturedQuad();
 	
-	
-	private static int shaderProgramID = 0;
-	private static int vertexShaderID = 0;
-	private static int fragmentShaderID = 0;
-	public static void buildShaders()
-	{
-		shaderProgramID = GL20.glCreateProgram();
-		vertexShaderID = GL20.glCreateShader(GL20.GL_VERTEX_SHADER);
-		fragmentShaderID = GL20.glCreateShader(GL20.GL_FRAGMENT_SHADER);
-		
-		GL20.glShaderSource(vertexShaderID, readFileAsString("./res/demoVertexShader"));
-		GL20.glCompileShader(vertexShaderID);
-		
-		GL20.glShaderSource(fragmentShaderID, readFileAsString("./res/demoFragmentShader"));
-		GL20.glCompileShader(fragmentShaderID);
-		
-		GL20.glAttachShader(shaderProgramID, vertexShaderID);
-		GL20.glAttachShader(shaderProgramID, fragmentShaderID);
-		
-		GL20.glLinkProgram(shaderProgramID);
-		GL20.glValidateProgram(shaderProgramID);
-		
+	public static void preload() {
 		terrainModel.preload();
+		textureTest.preload();
 	}
-	public static void trashShaders()
-	{
-		GL20.glDeleteProgram(shaderProgramID);
-		GL20.glDeleteShader(vertexShaderID);
-		GL20.glDeleteShader(fragmentShaderID);
+	public static void unload() {
+		
 	}
-	public static StringBuilder readFileAsString(String target)
-	{
-		StringBuilder sb = new StringBuilder();
-		BufferedReader br = null;
-		try
-		{
-			br = new BufferedReader(new FileReader(new File(target)));
-			String ln;
-			while((ln=br.readLine())!=null)
-				sb.append(ln);
-			br.close();
-			return sb;
-		}
-		catch(Exception e)
-		{
-			try { br.close(); } catch(Exception idc) {}
-			return null;
-		}
-	}
+	
+	
+	
+	
+	
 }

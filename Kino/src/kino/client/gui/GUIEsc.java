@@ -14,7 +14,7 @@ public class GUIEsc extends GUI {
 	@Override
 	public void draw(double interpolation)
 	{
-		RenderUtils.setup2DProjection(0f,100f, 0f,100f);
+		RenderUtils.setProjection_2D(0f,100f, 0f,100f);
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);

@@ -2,6 +2,8 @@ package kino.cache;
 
 import java.util.Iterator;
 
+import org.lwjgl.util.vector.Matrix;
+
 import kino.cache.BB.BoundingBox;
 import kino.client.gui.GUIGame;
 import kino.util.Vector3d;
@@ -30,7 +32,7 @@ public class Entity {
 	public double vertRot = 0;
 	public double horzRot = 0;
 	
-	private double E = 1;
+	private double E = 0.9;
 	/*
 	 * Collision Stages:
 	 * Va*Ma+Vb*Mb=Ua*Ma+Ub*Mb
@@ -72,6 +74,7 @@ public class Entity {
 					if(clip!=this && clip.debugBoundingBox!=null)
 					{
 						clip.debugBoundingBox.update(clip.position);
+						
 						if(debugBoundingBox.doesCollideWith(clip.debugBoundingBox))
 						{
 							position.swap();
@@ -82,10 +85,10 @@ public class Entity {
 							
 							if(n!=null && n.dot(motion)<0)
 							{
-								double Ua = motion.getMagnitude();
-								double Ub = clip.motion.getMagnitude();
 								double Ma = mass;
 								double Mb = clip.mass;
+								double Ua = motion.getMagnitude();
+								double Ub = clip.motion.getMagnitude();
 								double Va = (Ua*Ma+Ub*Mb)/(Ma+Mb+E*Mb*(Ub-Ua));
 								double Vb = Va+E*(Ub-Ua);
 								
@@ -113,13 +116,13 @@ public class Entity {
 					n = world.domain.getCollisionNormalOf(debugBoundingBox);
 					if(n!=null && n.dot(motion)<0)
 					{
-						if(motion.getMagnitudeSquared()>0.005)
+						if(motion.getMagnitudeSquared()>0.01)
 						{
-							motion = motion.reflect(n);
+							motion = motion.reflect(n).multiply(E);
 						}
 						else
 						{
-							motion = motion.flatten(n).multiply(0.7);
+							motion = motion.flatten(n).multiply(E);
 						}
 					}
 					
