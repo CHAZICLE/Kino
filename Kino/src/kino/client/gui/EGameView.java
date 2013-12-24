@@ -5,7 +5,6 @@ import kino.cache.EKino;
 import kino.cache.Entity;
 import kino.cache.World;
 import kino.cache.BB.BBRenderDebug;
-import kino.client.ScreenGUIManager;
 import kino.client.WorldRenderer;
 import kino.util.NumericalTools;
 import kino.util.RenderDebug;
@@ -17,10 +16,10 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
-public class GUIGame extends GUI {
+public class EGameView extends Element {
 	public static boolean freezeme = false;
-	public GUIGame(ScreenGUIManager paramManager) {
-		super(paramManager);
+	public EGameView(GUI holder) {
+		super(holder);
 		cache = new CacheManager();
 		cache.addWorld(renderWorld=new World());
 		
@@ -65,7 +64,6 @@ public class GUIGame extends GUI {
 		
 		
 		controlEntity = renderEntity = kino;
-		RenderUtils.setProjection_3D(FOV, getManager().getWidth()/getManager().getHeight());
 		
 		cache.start();
 	}
@@ -134,11 +132,16 @@ public class GUIGame extends GUI {
 			largeCube.teleport(controlEntity);
 		}
 		if(key==Keyboard.KEY_ESCAPE)
-			getManager().stackGUI(new GUIEsc(getManager()));
+		{
+			gui.getHolder().openGUI(new GUIEsc(gui.getHolder()));
+			
+		}
 		return true;
 	}
 	@Override
 	public boolean onMouseUp(int button, int x, int y) {
+		if(!hasFocus)
+			return false;
 		if(button==0)
 		{
 			System.out.println("Throwing the small sphere");
@@ -164,7 +167,7 @@ public class GUIGame extends GUI {
 		Mouse.setGrabbed(true);
 		storedX = Mouse.getX();
 		storedY = Mouse.getY();
-		Mouse.setCursorPosition(getManager().getWidth()/2, getManager().getHeight()/2);
+		Mouse.setCursorPosition(x+width/2, y+height/2);
 		recalculate = true;
 		Display.setResizable(true);
 	}
@@ -174,14 +177,21 @@ public class GUIGame extends GUI {
 		Mouse.setGrabbed(false);
 	}
 	@Override
+	public void onResize() {
+		RenderUtils.setProjection_3D(FOV, (float)width/height);
+		didResize = true;
+	}
+	boolean didResize = false;
+	@Override
 	public void draw(double interpolation)
 	{
-		if(getManager().isSurfaceGUI(this))
+		GL11.glViewport(x, y, width, height);
+		if(hasFocus)
 			controlLoop(interpolation);
 		
 		/* 3D */
 		RenderUtils.sendProjection_3D();
-		if(controlEntity!=renderEntity)//If we're not controlling what we're looking through just render it
+		if(controlEntity!=renderEntity)
 		{
 			RenderUtils.setViewParameters_RenderEntity(
 				renderEntity.position.getX(),
@@ -235,7 +245,6 @@ public class GUIGame extends GUI {
 			else
 			{
 				FOV--;
-				RenderUtils.setProjection_3D(FOV, Display.getWidth()/Display.getHeight());
 			}
 		}
 		else if(dw<0)
@@ -245,7 +254,6 @@ public class GUIGame extends GUI {
 			else
 			{
 				FOV++;
-				RenderUtils.setProjection_3D(FOV, Display.getWidth()/Display.getHeight());
 			}
 		}
 			
@@ -256,18 +264,18 @@ public class GUIGame extends GUI {
 		boolean controlEntityChanged = recalculate;
 		if(!recalculate) recalculate = false;
 		// Rotation changes
-		if(Mouse.getX()!=getManager().getWidth()/2)
+		if(Mouse.getX()!=width/2)
 		{
-			controlEntity.horzRot = NumericalTools.wrapTo(0, controlEntity.horzRot+MOUSE_SPEED*(getManager().getWidth()/2-Mouse.getX()), 360);
+			controlEntity.horzRot = NumericalTools.wrapTo(0, controlEntity.horzRot+MOUSE_SPEED*(width/2-Mouse.getX()), 360);
 			horzChange = true;
 		}
-		if(Mouse.getY()!=getManager().getHeight()/2)
+		if(Mouse.getY()!=height/2)
 		{
-			controlEntity.vertRot = NumericalTools.capTo(-90, controlEntity.vertRot-MOUSE_SPEED*(getManager().getHeight()/2-Mouse.getY()), 90);
+			controlEntity.vertRot = NumericalTools.capTo(-90, controlEntity.vertRot-MOUSE_SPEED*(height/2-Mouse.getY()), 90);
 			vertChange = true;
 		}
-		if(Mouse.getX()!=getManager().getWidth()/2 || Mouse.getY()!=getManager().getHeight()/2)
-			Mouse.setCursorPosition(getManager().getWidth()/2,getManager().getHeight()/2);
+		if(Mouse.getX()!=width/2 || Mouse.getY()!=height/2)
+			Mouse.setCursorPosition(width/2,height/2);
 		if(horzChange)
 		{
 			vectorCache_relativeRight = new Vector3d(

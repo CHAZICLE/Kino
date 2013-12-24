@@ -23,7 +23,7 @@ public class RenderUtils {
 	public static void setProjection_3D(float FOV, float ratio)
 	{
 		proj_FOV = FOV;
-		//proj_ratio = ratio;
+		proj_ratio = ratio;
 	}
 	public static void sendProjection_2D()
 	{

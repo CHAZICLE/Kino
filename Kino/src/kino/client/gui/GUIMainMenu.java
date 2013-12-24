@@ -1,49 +1,83 @@
 package kino.client.gui;
 
-import kino.client.ScreenGUIManager;
-import kino.util.RenderUtils;
-
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
+
+import kino.util.RenderUtils;
 
 
 public class GUIMainMenu extends GUI {
-	public GUIMainMenu(ScreenGUIManager paramManager) {
-		super(paramManager);
+	Element gameView = null;
+	public GUIMainMenu(ScreenGUIHolder paramHolder) {
+		super(paramHolder);
+		gameView = new EGameView(this);
+		gameView.x = 10;
+		gameView.y = 10;
+		gameView.width = 100;
+		gameView.height = 100;
+		elements.add(gameView);
 	}
-	boolean main = false;
-	
+	boolean expandGame = false;
+	int sizePercentage = 0;
 	@Override
-	public boolean onKeyUp(int button) {
-		if(button==Keyboard.KEY_RETURN)
+	public boolean onKeyUp(int key) {
+		if(key==Keyboard.KEY_ESCAPE)
 		{
-			main = true;
+			expandGame = !expandGame;
+			return true;
 		}
-		if(button==Keyboard.KEY_SPACE)
+		return false;
+	}
+	@Override
+	public boolean onMouseDown(int button, int x, int y) {
+		if(hasClickedOn(gameView, x, y))
 		{
-			getManager().overwriteGUI(new GUIGame(getManager()));
+			if(!expandGame)
+				expandGame = true;
+			else
+				gameView.onMouseDown(button, x, y);
 		}
 		return true;
 	}
 	@Override
 	public void draw(double interpolation) {
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		RenderUtils.setProjection_2D(-10f,10f, -10f,10f);
-		GL11.glLoadIdentity();
-		GL11.glColor3f(0.0f,0.0f,1.0f);
-		GL11.glLineWidth(1.0f);
-		GL11.glBegin(GL11.GL_LINES);
-		GL11.glVertex2f(+0.2f,+0.2f);
-		GL11.glVertex2f(-0.2f,-0.2f);
-		GL11.glVertex2f(-0.2f,+0.2f);
-		GL11.glVertex2f(+0.2f,-0.2f);
-		if(main)
+		RenderUtils.setProjection_2D(0,getHolder().getWidth(), 0,getHolder().getHeight());
+		if(sizePercentage<100 && expandGame)
 		{
-			GL11.glVertex2f(-4.0f,+0.0f);
-			GL11.glVertex2f(+4.0f,+0.0f);
-			GL11.glVertex2f(+0.0f,-4.0f);
-			GL11.glVertex2f(+0.0f,+4.0f);
+			gameView.x = (int)((float)(100-sizePercentage)/100*10);
+			gameView.y = (int)((float)(100-sizePercentage)/100*10);
+			gameView.width = 100+(int)((float)sizePercentage/100*(getHolder().getWidth()-100));
+			gameView.height = 100+(int)((float)sizePercentage/100*(getHolder().getHeight()-100));
+			sizePercentage++;
+			if(sizePercentage==100)
+			{
+				gameView.x = 0;
+				gameView.y = 0;
+				gameView.width = getHolder().getWidth();
+				gameView.height = getHolder().getHeight();
+				gameView.focus();
+			}
+			else
+				gameView.onResize();
 		}
-		GL11.glEnd();
+		else if(sizePercentage>0 && !expandGame)
+		{
+			gameView.x = (int)((float)(100-sizePercentage)/100*10);
+			gameView.y = (int)((float)(100-sizePercentage)/100*10);
+			gameView.width = 100+(int)((float)sizePercentage/100*(getHolder().getWidth()-100));
+			gameView.height = 100+(int)((float)sizePercentage/100*(getHolder().getHeight()-100));
+			if(sizePercentage==100)
+				gameView.blur();
+			else
+				gameView.onResize();
+			sizePercentage--;
+		}
+		for(Element e : elements)
+		{
+			e.draw(interpolation);
+		}
+	}
+	@Override
+	public void onResize() {
+		super.onResize();
 	}
 }

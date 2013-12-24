@@ -1,6 +1,5 @@
 package kino.client.gui;
 
-import kino.client.ScreenGUIManager;
 import kino.util.RenderUtils;
 
 import org.lwjgl.input.Keyboard;
@@ -8,8 +7,8 @@ import org.lwjgl.opengl.GL11;
 
 public class GUIEsc extends GUI {
 
-	public GUIEsc(ScreenGUIManager paramManager) {
-		super(paramManager);
+	public GUIEsc(ScreenGUIHolder paramHolder) {
+		super(paramHolder);
 	}
 	@Override
 	public void draw(double interpolation)
@@ -41,7 +40,7 @@ public class GUIEsc extends GUI {
 	public boolean onKeyUp(int key) {
 		if(key==Keyboard.KEY_ESCAPE)
 		{
-			getManager().closeGUI(this);
+			getHolder().closeGUI(this);
 		}
 		return true;
 	}

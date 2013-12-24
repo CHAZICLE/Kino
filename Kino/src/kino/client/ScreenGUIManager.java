@@ -2,6 +2,7 @@ package kino.client;
 
 import kino.client.gui.GUI;
 import kino.client.gui.GUIMainMenu;
+import kino.client.gui.ScreenGUIHolder;
 import kino.util.RenderUtils;
 
 import org.lwjgl.LWJGLException;
@@ -15,13 +16,8 @@ import org.lwjgl.opengl.GL11;
 public class ScreenGUIManager extends Thread implements ScreenGUIHolder {
 	public ScreenGUIManager()
 	{
-		overwriteGUI(new GUIMainMenu(this));
+		openRootGUI(new GUIMainMenu(this));
 	}
-	GUI firstGUI;
-	GUI lastGUI;
-	
-	
-	
 	@Override
 	public void run()
 	{
@@ -48,6 +44,8 @@ public class ScreenGUIManager extends Thread implements ScreenGUIHolder {
 			// Mouse events
 			while(Mouse.next())
 			{
+				if(Mouse.getEventButton()==-1)
+					continue;
 				int x=Mouse.getEventX(),y=Mouse.getEventY(),button=Mouse.getEventButton();
 				boolean state = Mouse.getEventButtonState();
 				GUI current = lastGUI;
@@ -73,7 +71,7 @@ public class ScreenGUIManager extends Thread implements ScreenGUIHolder {
 			while((current = current.next)!=null);
 			Display.update();
 		}
-		overwriteGUI(null);
+		openRootGUI(null);
 		WorldRenderer.unload();
 		RenderUtils.unload();
 		stopDisplay();
@@ -103,6 +101,25 @@ public class ScreenGUIManager extends Thread implements ScreenGUIHolder {
 	{
 		try { Display.destroy(); } catch(Exception e) { }
 	}
+	
+	@Override
+	public int getWidth() {
+		return Display.getWidth();
+	}
+	@Override
+	public int getHeight() {
+		return Display.getHeight();
+	}
+	@Override
+	public boolean wasResized() {
+		return Display.wasResized();
+	}
+	
+	
+	// Gui Functions
+	protected GUI firstGUI = null;
+	protected GUI lastGUI = null;
+	@Override
 	public void closeGUI(GUI gui)
 	{
 		if(gui==firstGUI)
@@ -111,31 +128,33 @@ public class ScreenGUIManager extends Thread implements ScreenGUIHolder {
 		{
 			lastGUI = gui.previous;
 			if(lastGUI!=null)
-				lastGUI.onFocus();
+				lastGUI.onUncover();
 		}
 		if(gui.previous!=null)
 			gui.previous.next = gui.next;
 		if(gui.next!=null)
 			gui.next.previous = gui.previous;
-		gui.onBlur();
+		gui.onCover();
 		gui.onClose();
 	}
-	public void stackGUI(GUI gui)
+	@Override
+	public void openGUI(GUI gui)
 	{
 		if(gui==null) return;
 		lastGUI.next = gui;
 		gui.previous = lastGUI;
 		lastGUI = gui;
 		gui.onOpen();
-		gui.previous.onBlur();
-		gui.onFocus();
+		gui.previous.onCover();
+		gui.onUncover();
 	}
-	public void overwriteGUI(GUI gui)
+	@Override
+	public void openRootGUI(GUI gui)
 	{
 		GUI current = firstGUI;
 		while(current!=null)
 		{
-			current.onBlur();
+			current.onCover();
 			current.onClose();
 			current = current.next;
 		}
@@ -143,19 +162,12 @@ public class ScreenGUIManager extends Thread implements ScreenGUIHolder {
 		if(gui!=null)
 		{
 			gui.onOpen();
-			gui.onFocus();
+			gui.onUncover();
 		}
 	}
+	@Override
 	public boolean isSurfaceGUI(GUI gui)
 	{
 		return gui==lastGUI;
-	}
-	@Override
-	public int getWidth() {
-		return Display.getWidth();
-	}
-	@Override
-	public int getHeight() {
-		return Display.getHeight();
 	}
 }
