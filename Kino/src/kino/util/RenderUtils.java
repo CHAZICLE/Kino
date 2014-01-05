@@ -41,16 +41,22 @@ public class RenderUtils {
 	}
 	
 	public static final GLSLProgram colorShader = new GLSLProgram("basicColor");
+	public static final GLSLProgram textureTestShader = new GLSLProgram("textureTest");
 	
 	public static GLSLProgram activeShader = null;
 	public static void useColorShader()
 	{
 		activeShader = colorShader;
-		activeShader.sendView(view_RenderEntityCache);
-		colorShader.activate();
+		activeShader.activate();
+	}
+	public static void useTextureTestShader()
+	{
+		activeShader = textureTestShader;
+		activeShader.activate();
 	}
 	public static void preload() {
 		colorShader.build();
+		textureTestShader.build();
 	}
 	public static void unload()
 	{

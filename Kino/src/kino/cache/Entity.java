@@ -5,7 +5,7 @@ import java.util.Iterator;
 import org.lwjgl.util.vector.Matrix;
 
 import kino.cache.BB.BoundingBox;
-import kino.client.gui.EGameView;
+import kino.client.gui.GUIGameView;
 import kino.util.Vector3d;
 
 
@@ -100,7 +100,7 @@ public class Entity {
 								clip.motion.setMagnitude(Vb);
 								motion.setMagnitude(Va);
 								
-								movement = !EGameView.freezeme;
+								movement = !GUIGameView.freezeme;
 							}
 						}
 					}

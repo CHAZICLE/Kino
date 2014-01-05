@@ -2,7 +2,6 @@ package kino.client.gui;
 
 import kino.util.RenderUtils;
 
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 public class GUIEsc extends GUI {
@@ -35,17 +34,5 @@ public class GUIEsc extends GUI {
 		GL11.glVertex2f(100.0f, 100.0f);
 		GL11.glEnd();
 		GL11.glDisable(GL11.GL_BLEND);
-	}
-	@Override
-	public boolean onKeyUp(int key) {
-		if(key==Keyboard.KEY_ESCAPE)
-		{
-			getHolder().closeGUI(this);
-		}
-		return true;
-	}
-	@Override
-	public void onClose() {
-		
 	}
 }

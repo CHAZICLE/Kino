@@ -6,6 +6,7 @@ import kino.cache.Entity;
 import kino.cache.World;
 import kino.cache.BB.BBRenderDebug;
 import kino.client.WorldRenderer;
+import kino.client.controls.Controls.ControlAction;
 import kino.util.NumericalTools;
 import kino.util.RenderDebug;
 import kino.util.RenderUtils;
@@ -16,9 +17,9 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
-public class EGameView extends Element {
+public class GUIGameView extends GUI {
 	public static boolean freezeme = false;
-	public EGameView(GUI holder) {
+	public GUIGameView(ScreenGUIHolder holder) {
 		super(holder);
 		cache = new CacheManager();
 		cache.addWorld(renderWorld=new World());
@@ -93,7 +94,6 @@ public class EGameView extends Element {
 	private boolean debugAxisMarks = false;
 	private boolean debugMouseWheelControlsPower = true;
 	
-	@Override
 	public boolean onKeyUp(int key) {
 		if(key==Keyboard.KEY_Y)
 		{
@@ -133,61 +133,57 @@ public class EGameView extends Element {
 		}
 		if(key==Keyboard.KEY_ESCAPE)
 		{
-			gui.getHolder().openGUI(new GUIEsc(gui.getHolder()));
-			
+			getHolder().openGUI(new GUIEsc(getHolder()));
 		}
 		return true;
 	}
 	@Override
-	public boolean onMouseUp(int button, int x, int y) {
-		if(!hasFocus)
-			return false;
-		if(button==0)
+	public boolean onRelease(byte index, int x, int y, ControlAction action)
+	{
+		if(index==0)
 		{
 			System.out.println("Throwing the small sphere");
 			smallSphere.teleport(controlEntity);
 			smallSphere.movement = true;
 			smallSphere.motion = vectorCache_relativeForward.makeMagnitude(throwPower);
 		}
-		else if(button==1)
+		else if(index==-1)
 		{
 			System.out.println("Throwing the small cube");
 			smallCube.teleport(controlEntity);
 			smallCube.movement = true;
 			smallCube.motion = vectorCache_relativeForward.makeMagnitude(throwPower);
 		}
-		return super.onMouseUp(button, x, y);
+		else
+			return false;
+		return true;
+	}
+	@Override
+	public void onExpose()
+	{
+		Mouse.setGrabbed(true);
+		storedX = Mouse.getX();
+		storedY = Mouse.getY();
+		Mouse.setCursorPosition(getHolder().getOffsetX()+getHolder().getWidth()/2, getHolder().getOffsetY()+getHolder().getHeight()/2);
+		recalculate = true;
 	}
 	@Override
 	public void onClose() {
 		cache.running = false;
 	}
 	@Override
-	public void onFocus() {
-		Mouse.setGrabbed(true);
-		storedX = Mouse.getX();
-		storedY = Mouse.getY();
-		Mouse.setCursorPosition(x+width/2, y+height/2);
-		recalculate = true;
-		Display.setResizable(true);
-	}
-	@Override
-	public void onBlur() {
+	public void onCover() {
 		Mouse.setCursorPosition(storedX, storedY);
 		Mouse.setGrabbed(false);
 	}
 	@Override
 	public void onResize() {
-		RenderUtils.setProjection_3D(FOV, (float)width/height);
-		didResize = true;
+		RenderUtils.setProjection_3D(FOV, (float)getHolder().getWidth()/getHolder().getHeight());
 	}
-	boolean didResize = false;
 	@Override
 	public void draw(double interpolation)
 	{
-		GL11.glViewport(x, y, width, height);
-		if(hasFocus)
-			controlLoop(interpolation);
+		GL11.glViewport(getHolder().getOffsetX(),getHolder().getOffsetY(),getHolder().getWidth(),getHolder().getHeight());
 		
 		/* 3D */
 		RenderUtils.sendProjection_3D();
@@ -220,7 +216,7 @@ public class EGameView extends Element {
 		
 		
 		/* 2D */
-		RenderUtils.setProjection_2D(-50f,50f,-50f,50f);
+		RenderUtils.setProjection_2D(0,getHolder().getWidth(),0,getHolder().getHeight());
 		RenderUtils.sendViewParameters_Normal();
 		GL11.glLoadIdentity();
 		
@@ -264,18 +260,18 @@ public class EGameView extends Element {
 		boolean controlEntityChanged = recalculate;
 		if(!recalculate) recalculate = false;
 		// Rotation changes
-		if(Mouse.getX()!=width/2)
+		if(Mouse.getX()!=getHolder().getWidth()/2)
 		{
-			controlEntity.horzRot = NumericalTools.wrapTo(0, controlEntity.horzRot+MOUSE_SPEED*(width/2-Mouse.getX()), 360);
+			controlEntity.horzRot = NumericalTools.wrapTo(0, controlEntity.horzRot+MOUSE_SPEED*(getHolder().getWidth()/2-Mouse.getX()), 360);
 			horzChange = true;
 		}
-		if(Mouse.getY()!=height/2)
+		if(Mouse.getY()!=getHolder().getHeight()/2)
 		{
-			controlEntity.vertRot = NumericalTools.capTo(-90, controlEntity.vertRot-MOUSE_SPEED*(height/2-Mouse.getY()), 90);
+			controlEntity.vertRot = NumericalTools.capTo(-90, controlEntity.vertRot-MOUSE_SPEED*(getHolder().getHeight()/2-Mouse.getY()), 90);
 			vertChange = true;
 		}
-		if(Mouse.getX()!=width/2 || Mouse.getY()!=height/2)
-			Mouse.setCursorPosition(width/2,height/2);
+		if(Mouse.getX()!=getHolder().getWidth()/2 || Mouse.getY()!=getHolder().getHeight()/2)
+			Mouse.setCursorPosition(getHolder().getWidth()/2,getHolder().getHeight()/2);
 		if(horzChange)
 		{
 			vectorCache_relativeRight = new Vector3d(

@@ -2,7 +2,7 @@ package kino.applet;
 
 import java.io.File;
 
-import kino.client.ScreenGUIManager;
+import kino.client.DisplayGUIHolder;
 
 
 public class Main {
@@ -38,7 +38,7 @@ public class Main {
 					throw new IllegalArgumentException("Can't write to the log file");
 			}
 		}
-		new ScreenGUIManager().run();
+		new DisplayGUIHolder().run();
 		
 	}
 	private static boolean hasFlag(String arg, char flag)

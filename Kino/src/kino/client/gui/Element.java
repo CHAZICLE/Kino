@@ -1,59 +1,17 @@
 package kino.client.gui;
 
+import kino.client.controls.Controls;
 
-public class Element {
+
+public abstract class Element {
+	int x,y,width,height;
+	private GUI gui;
+	private boolean isDisabled;
 	public Element(GUI paramHolder)
 	{
 		gui = paramHolder;
 	}
-	int x,y,width,height;
-	GUI gui;
-	boolean hasFocus;
-	
-	/**
-	 * Called when the GUI opens
-	 */
-	public void onOpen(){};
-	/**
-	 * Called when the GUI closes
-	 */
-	public void onClose(){};
-	public final void focus()
-	{
-		if(gui.focusElement!=null)
-			gui.focusElement.onBlur();
-		gui.focusElement = this;
-		hasFocus = true;
-		onFocus();
-	}
-	public final void blur()
-	{
-		if(gui.focusElement==this)
-		{
-			gui.focusElement.onBlur();
-			gui.focusElement = null;
-			hasFocus = false;
-		}
-	}
-	public void onFocus(){};
-	public void onBlur(){};
-	public void onResize(){}
-	public boolean onMouseDown(int button, int x, int y)
-	{
-		return false;
-	}
-	public boolean onMouseUp(int button, int x, int y)
-	{
-		return false;
-	}
-	public boolean onKeyDown(int key)
-	{
-		return false;
-	}
-	public boolean onKeyUp(int key)
-	{
-		return false;
-	}
+	// Essentials
 	public void draw(double interpolation)
 	{
 		
@@ -62,4 +20,40 @@ public class Element {
 	{
 		return gui;
 	}
+	public boolean shouldFocusOnPress()
+	{
+		return false;
+	}
+	public boolean isDisabled()
+	{
+		return isDisabled;
+	}
+	public void setDisabled(boolean disabled)
+	{
+		if(isDisabled!=disabled)
+		{
+			isDisabled = disabled;
+			onDisableStateChanged();
+		}
+	}
+	boolean pointIsInside(int x, int y)
+	{
+		return x>=this.x && y>=this.y && x<=this.x+this.width && y<=this.y+this.height;
+	}
+	
+	// Events
+	public void onOpen(){}
+	public void onClose(){}
+	public void onAdded(){}
+	public void onRemoved(){}
+	public void onFocus(){}
+	public void onFocus(int x, int y){}
+	public void onBlur(){}
+	public void onResize(){}
+	public void onPress(byte index, int x, int y){}
+	public void onMove(byte index, int x, int y){}
+	public void onRelease(byte index, int x, int y){getHolder().focusElement(this);}
+	public void onControlDown(Controls.ControlAction type){}
+	public void onControlUp(Controls.ControlAction type){}
+	public void onDisableStateChanged(){}
 }

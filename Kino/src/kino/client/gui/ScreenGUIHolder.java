@@ -5,7 +5,8 @@ public interface ScreenGUIHolder {
 	
 	public abstract int getWidth();
 	public abstract int getHeight();
-	public abstract boolean wasResized();
+	public abstract int getOffsetX();
+	public abstract int getOffsetY();
 	
 	public void closeGUI(GUI gui);
 	public void openGUI(GUI gui);
