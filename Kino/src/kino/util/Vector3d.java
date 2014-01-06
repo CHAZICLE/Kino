@@ -21,7 +21,7 @@ public class Vector3d {
 		z = paramZ;
 		store();
 	}
-	public Vector3d() { this(0,0,0); }
+	public Vector3d() { }
 	
 	// Add
 	public Vector3d add(double paramX, double paramY, double paramZ) { x += paramX; y += paramY; z += paramZ; return this; }
@@ -89,6 +89,10 @@ public class Vector3d {
 	public Vector3d set(Vector3d newVec) {
 		setXYZ(newVec.x, newVec.y, newVec.z);
 		return this;
+	}
+	public Vector3d nullify()
+	{
+		return setXYZ(0, 0, 0);
 	}
 	
 	

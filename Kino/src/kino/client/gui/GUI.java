@@ -19,90 +19,55 @@ public abstract class GUI {
 	{
 		drawElements(interpolation);
 	}
-	public ScreenGUIHolder getHolder()
-	{
-		return holder;
-	}
+	public ScreenGUIHolder getHolder(){return holder;}
 	// Events
-	public void onOpen()
+	public void onOpen(){}
+	public void onClose(){}
+	public void onExpose(){}
+	public void onCover(){}
+	public void onResize(){}
+	public boolean onPress(byte index, int x, int y, Controls.ControlAction action){return false;}
+	public boolean onMove(byte index, int x, int y, Controls.ControlAction action){return false;}
+	public boolean onRelease(byte index, int x, int y, Controls.ControlAction action){return false;}
+	public void onControlDown(Controls.ControlAction action){}
+	public void onControlUp(Controls.ControlAction action){}
+	// Final Events
+	public final void doOpen(){ isOpen = true; onOpen(); for(Element el : elements) el.onOpen(); }
+	public final void doClose(){ isOpen = false; isExposed = false; onClose(); for(Element el : elements) el.onClose(); }
+	public final void doExpose(){ isExposed = true; onExpose(); }
+	public final void doCover(){ isExposed = false; onCover(); }
+	public final void doPress(byte index, int x, int y, Controls.ControlAction action)
 	{
-		isOpen = true;
-		for(Element el : elements) el.onOpen();
-	}
-	public void onClose()
-	{
-		isExposed = false;
-		isOpen = false;
-		for(Element el : elements) el.onClose();
-	}
-	public void onExpose()
-	{
-		isExposed = true;
-	}
-	public void onCover()
-	{
-		isExposed = false;
-	}
-	public void onResize()
-	{
-		
-	}
-	public boolean onPress(byte index, int x, int y, kino.client.controls.Controls.ControlAction action)
-	{
-		boolean consumed = false;
-		for(Element el : elements)
+		if(!onPress(index, x, y, action))
 		{
-			if(el.pointIsInside(x, y))
+			for(Element el : elements)
 			{
-				el.onPress(index, x, y);
-				consumed = true;
+				if(el.pointIsInside(x, y))
+					el.onPress(index, x, y);
 			}
 		}
-		return consumed;
 	}
-	public boolean onMove(byte index, int x, int y, Controls.ControlAction action)
+	public final void doMove(byte index, int x, int y, Controls.ControlAction action)
 	{
-		boolean consumed = false;
-		for(Element el : elements)
+		if(!onMove(index, x, y, action))
 		{
-			if(el.pointIsInside(x, y))
+			for(Element el : elements)
 			{
-				el.onMove(index, x, y);
-				consumed = true;
+				if(el.pointIsInside(x, y))
+					el.onMove(index, x, y);
 			}
 		}
-		return consumed;
 	}
-	public boolean onRelease(byte index, int x, int y, Controls.ControlAction action)
+	public final void doRelease(byte index, int x, int y, Controls.ControlAction action)
 	{
-		boolean consumed = false;
-		for(Element el : elements)
+		if(!onRelease(index, x, y, action))
 		{
-			if(el.pointIsInside(x, y))
+			for(Element el : elements)
 			{
-				el.onRelease(index, x, y);
-				consumed = true;
+				if(el.pointIsInside(x, y))
+					el.onRelease(index, x, y);
 			}
 		}
-		return consumed;
-	}
-	public boolean onControlDown(Controls.ControlAction type)
-	{
-		if(focusElement!=null)
-		{
-			focusElement.onControlDown(type);
-			return true;
-		}
-		return false;
-	}
-	public boolean onControlUp(Controls.ControlAction type)
-	{
-		if(focusElement!=null)
-		{
-			focusElement.onControlUp(type);
-			return true;
-		}
-		return false;
 	}
 	// States
 	public boolean isOpen()
@@ -115,20 +80,18 @@ public abstract class GUI {
 	}
 	// Elements
 	private List<Element> elements = new ArrayList<Element>();
-	Element focusElement;
 	public final void addElement(Element el)
 	{
 		elements.add(el);
 		el.onAdded();
 		if(isOpen)
 			el.onOpen();
-		
 	}
 	public final void removeElement(Element el)
 	{
 		elements.remove(el);
-		if(focusElement==el)
-			blurElement();
+		if(getHolder().getFocusElement()==el)
+			getHolder().blurElement();
 		el.onClose();
 		el.onRemoved();
 	}
@@ -137,19 +100,4 @@ public abstract class GUI {
 		for(Element e : elements)
 			e.draw(interpolation);
 	}
-	public final void focusElement(Element el)
-	{
-		blurElement();
-		focusElement = el;
-		focusElement.onFocus();
-	}
-	public final void blurElement()
-	{
-		if(focusElement!=null)
-		{
-			focusElement.onBlur();
-			focusElement = null;
-		}
-	}
-	
 }

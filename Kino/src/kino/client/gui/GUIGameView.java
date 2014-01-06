@@ -14,7 +14,6 @@ import kino.util.Vector3d;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
 public class GUIGameView extends GUI {
@@ -83,8 +82,6 @@ public class GUIGameView extends GUI {
 	public Entity smallCube;
 	public Entity largeCube;
 	
-	private int storedX = 0;
-	private int storedY = 0;
 	private boolean recalculate = true;
 	private static final double MOUSE_SPEED = 0.1f;
 	public float FOV = 70;
@@ -94,7 +91,36 @@ public class GUIGameView extends GUI {
 	private boolean debugAxisMarks = false;
 	private boolean debugMouseWheelControlsPower = true;
 	
-	public boolean onKeyUp(int key) {
+	
+	@Override
+	public void onOpen() {
+		super.onOpen();
+		
+	}
+	@Override
+	public void onClose() {
+		super.onClose();
+		cache.running = false;
+	}
+	@Override
+	public void onExpose()
+	{
+		super.onExpose();
+		//Mouse.setCursorPosition(getHolder().getOffsetX()+getHolder().getWidth()/2, getHolder().getOffsetY()+getHolder().getHeight()/2);
+		Mouse.setGrabbed(true);
+		recalculate = true;
+	}
+	@Override
+	public void onCover() {
+		super.onCover();
+		Mouse.setGrabbed(false);
+	}
+	@Override
+	public void onResize() {
+		RenderUtils.setProjection_3D(FOV, (float)getHolder().getWidth()/getHolder().getHeight());
+	}
+	
+	/*public boolean onKeyUp(int key) {
 		if(key==Keyboard.KEY_Y)
 		{
 			freezeme = !freezeme;
@@ -136,18 +162,18 @@ public class GUIGameView extends GUI {
 			getHolder().openGUI(new GUIEsc(getHolder()));
 		}
 		return true;
-	}
+	}*/
 	@Override
 	public boolean onRelease(byte index, int x, int y, ControlAction action)
 	{
-		if(index==0)
+		if(action==ControlAction.SELECT)
 		{
 			System.out.println("Throwing the small sphere");
 			smallSphere.teleport(controlEntity);
 			smallSphere.movement = true;
 			smallSphere.motion = vectorCache_relativeForward.makeMagnitude(throwPower);
 		}
-		else if(index==-1)
+		else if(action==ControlAction.MENU)
 		{
 			System.out.println("Throwing the small cube");
 			smallCube.teleport(controlEntity);
@@ -159,31 +185,10 @@ public class GUIGameView extends GUI {
 		return true;
 	}
 	@Override
-	public void onExpose()
-	{
-		Mouse.setGrabbed(true);
-		storedX = Mouse.getX();
-		storedY = Mouse.getY();
-		Mouse.setCursorPosition(getHolder().getOffsetX()+getHolder().getWidth()/2, getHolder().getOffsetY()+getHolder().getHeight()/2);
-		recalculate = true;
-	}
-	@Override
-	public void onClose() {
-		cache.running = false;
-	}
-	@Override
-	public void onCover() {
-		Mouse.setCursorPosition(storedX, storedY);
-		Mouse.setGrabbed(false);
-	}
-	@Override
-	public void onResize() {
-		RenderUtils.setProjection_3D(FOV, (float)getHolder().getWidth()/getHolder().getHeight());
-	}
-	@Override
 	public void draw(double interpolation)
 	{
-		GL11.glViewport(getHolder().getOffsetX(),getHolder().getOffsetY(),getHolder().getWidth(),getHolder().getHeight());
+		if(isExposed())
+			controlLoop(interpolation);
 		
 		/* 3D */
 		RenderUtils.sendProjection_3D();
@@ -232,6 +237,7 @@ public class GUIGameView extends GUI {
 	double multiplier = 0;
 	void controlLoop(double interpolation)
 	{
+		System.out.println("controlLoop("+interpolation+")");
 		// FOV Changes
 		int dw = Mouse.getDWheel();
 		if(dw>0)
@@ -258,7 +264,7 @@ public class GUIGameView extends GUI {
 		boolean rightChanged = recalculate;
 		boolean directionChanged = recalculate;
 		boolean controlEntityChanged = recalculate;
-		if(!recalculate) recalculate = false;
+		if(recalculate) recalculate = false;
 		// Rotation changes
 		if(Mouse.getX()!=getHolder().getWidth()/2)
 		{

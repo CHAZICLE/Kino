@@ -1,6 +1,8 @@
 package kino.client;
 
 import kino.client.controls.Controls;
+import kino.client.controls.Controls.ControlType;
+import kino.client.gui.Element;
 import kino.client.gui.GUI;
 import kino.client.gui.GUIMainMenu;
 import kino.client.gui.ScreenGUIHolder;
@@ -8,8 +10,6 @@ import kino.util.RenderUtils;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
@@ -41,18 +41,20 @@ public class DisplayGUIHolder extends Thread implements ScreenGUIHolder {
 			// Controls
 			while(Controls.next())
 			{
-				for(GUI current=lastGUI;current.previous!=null;current=current.previous)
+				if(focusElement!=null && ((Controls.type==ControlType.PRESS && focusElement.onControlDown(Controls.action)) || (Controls.type==ControlType.RELEASE && focusElement.onControlUp(Controls.action))))
+					continue;
+				for(GUI current=lastGUI;current!=null;current=current.previous)
 				{
 					switch(Controls.type)
 					{
 					case LOCATION_PRESS:
-						current.onPress(Controls.index, Controls.x, Controls.y, Controls.action);
+						current.doPress(Controls.index, Controls.x, Controls.y, Controls.action);
 						break;
 					case LOCATION_RELEASE:
-						current.onRelease(Controls.index, Controls.x, Controls.y, Controls.action);
+						current.doRelease(Controls.index, Controls.x, Controls.y, Controls.action);
 						break;
 					case MOVE:
-						current.onMove(Controls.index, Controls.x, Controls.y, Controls.action);
+						current.doMove(Controls.index, Controls.x, Controls.y, Controls.action);
 						break;
 					case PRESS:
 						current.onControlDown(Controls.action);
@@ -63,19 +65,16 @@ public class DisplayGUIHolder extends Thread implements ScreenGUIHolder {
 					}
 				}
 			}
+			// Game Controls
+			
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-			GUI current = firstGUI;
 			double interpolation = getDelta();
 			RenderUtils.useColorShader();
-			do
+			GL11.glViewport(getOffsetX(),getOffsetY(),getWidth(),getHeight());
+			for(GUI current=firstGUI;current!=null;current=current.next)
 			{
-				GL11.glViewport(
-					0,0,
-					Display.getWidth(), Display.getHeight()
-				);
 				current.draw(interpolation);
 			}
-			while((current = current.next)!=null);
 			Display.update();
 		}
 		openRootGUI(null);
@@ -92,16 +91,6 @@ public class DisplayGUIHolder extends Thread implements ScreenGUIHolder {
 	{
 		return (Sys.getTime()*1000)/Sys.getTimerResolution();
 	}
-	
-	@Override
-	public int getWidth() {
-		return Display.getWidth();
-	}
-	@Override
-	public int getHeight() {
-		return Display.getHeight();
-	}
-	
 	// GUI
 	protected GUI firstGUI = null;
 	protected GUI lastGUI = null;
@@ -130,9 +119,9 @@ public class DisplayGUIHolder extends Thread implements ScreenGUIHolder {
 		lastGUI.next = gui;
 		gui.previous = lastGUI;
 		lastGUI = gui;
-		gui.onOpen();
-		gui.previous.onCover();
-		gui.onExpose();
+		gui.doOpen();
+		gui.previous.doCover();
+		gui.doExpose();
 	}
 	@Override
 	public void openRootGUI(GUI gui)
@@ -140,15 +129,15 @@ public class DisplayGUIHolder extends Thread implements ScreenGUIHolder {
 		GUI current = firstGUI;
 		while(current!=null)
 		{
-			current.onCover();
-			current.onClose();
+			current.doCover();
+			current.doClose();
 			current = current.next;
 		}
 		firstGUI = lastGUI = gui;
 		if(gui!=null)
 		{
-			gui.onOpen();
-			gui.onExpose();
+			gui.doOpen();
+			gui.doExpose();
 		}
 	}
 	@Override
@@ -160,7 +149,37 @@ public class DisplayGUIHolder extends Thread implements ScreenGUIHolder {
 		return 0;
 	}
 	@Override
+	public int getWidth() {
+		return Display.getWidth();
+	}
+	@Override
+	public int getHeight() {
+		return Display.getHeight();
+	}
+	@Override
 	public boolean isSurfaceGUI(GUI gui) {
 		return false;
+	}
+	private Element focusElement;
+	@Override
+	public Element blurElement() {
+		if(focusElement!=null)
+		{
+			Element e = focusElement;
+			focusElement.onBlur();
+			focusElement = null;
+			return e;
+		}
+		return null;
+	}
+	@Override
+	public Element getFocusElement() {
+		return focusElement;
+	}
+	@Override
+	public Element focusElement(Element e) {
+		Element e2 = blurElement();
+		focusElement = e;
+		return e2;
 	}
 }
