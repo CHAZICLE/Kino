@@ -16,6 +16,12 @@ public class GLSLProgram {
 	private int fragmentShaderID = 0;
 	private String shaderProgram = null;
 	private int viewMatrixPosition = 0;
+	public int texturePosition = -1;
+	public GLSLProgram(String shaderProgram, boolean hasTexture) {
+		this(shaderProgram);
+		if(hasTexture)
+			texturePosition = 0;
+	}
 	public GLSLProgram(String shaderProgram) {
 		if(shaderProgram==null)
 			throw new IllegalArgumentException("Shader prefix can't be null");
@@ -52,6 +58,8 @@ public class GLSLProgram {
 		GL20.glValidateProgram(program);
 		
 		viewMatrixPosition = GL20.glGetUniformLocation(program, "viewMatrix");
+		if(texturePosition==0)
+			texturePosition = GL20.glGetAttribLocation(program, "vertexUV");
 		
 		if(GL20.glGetProgrami(program, GL20.GL_LINK_STATUS) == GL11.GL_FALSE)
 		{

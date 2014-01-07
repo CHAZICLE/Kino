@@ -49,10 +49,11 @@ public class RenderUtils {
 		activeShader = colorShader;
 		activeShader.activate();
 	}
-	public static void useTextureTestShader()
+	public static GLSLProgram useTextureTestShader()
 	{
 		activeShader = textureTestShader;
 		activeShader.activate();
+		return textureTestShader;
 	}
 	public static void preload() {
 		colorShader.build();

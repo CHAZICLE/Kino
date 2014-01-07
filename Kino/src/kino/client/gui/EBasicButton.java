@@ -11,7 +11,7 @@ public class EBasicButton extends Element {
 	}
 	@Override
 	public void draw(double interpolation) {
-		System.out.println("DRAW BASIC BUTTON ("+x+","+y+","+width+","+height+")");
+		//System.out.println("DRAW BASIC BUTTON ("+x+","+y+","+width+","+height+")");
 		RenderUtils.setProjection_2D(0,getHolder().getHolder().getWidth(),y,getHolder().getHolder().getHeight());
 		RenderUtils.sendProjection_2D();
 		RenderUtils.sendViewParameters_Normal();
