@@ -1,6 +1,6 @@
 package kino.client.gui;
 
-import kino.client.controls.Controls.ControlAction;
+import kino.client.controls.MenuControls.Action;
 
 
 
@@ -15,8 +15,8 @@ public class GUIMainMenu extends GUI {
 		addElement(ebb);
 	}
 	@Override
-	public void onControlUp(ControlAction action) {
-		if(action==ControlAction.SELECT)
+	public void onControlUp(Action action) {
+		if(action==Action.SELECT)
 		{
 			getHolder().openRootGUI(new GUIGameView(getHolder()));
 		}

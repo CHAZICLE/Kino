@@ -6,7 +6,7 @@ import kino.cache.Entity;
 import kino.cache.World;
 import kino.cache.BB.BBRenderDebug;
 import kino.client.WorldRenderer;
-import kino.client.controls.Controls.ControlAction;
+import kino.client.controls.MenuControls.Action;
 import kino.client.controls.GameControls;
 import kino.util.NumericalTools;
 import kino.util.RenderDebug;

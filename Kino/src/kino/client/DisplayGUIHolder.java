@@ -1,7 +1,7 @@
 package kino.client;
 
-import kino.client.controls.Controls;
-import kino.client.controls.Controls.ControlType;
+import kino.client.controls.MenuControls;
+import kino.client.controls.MenuControls.State;
 import kino.client.gui.Element;
 import kino.client.gui.GUI;
 import kino.client.gui.GUIMainMenu;
@@ -39,28 +39,28 @@ public class DisplayGUIHolder extends Thread implements ScreenGUIHolder {
 			if(firstGUI==null || lastGUI==null)
 				break;
 			// Controls
-			while(Controls.next())
+			while(MenuControls.next())
 			{
-				if(focusElement!=null && ((Controls.type==ControlType.PRESS && focusElement.onControlDown(Controls.action)) || (Controls.type==ControlType.RELEASE && focusElement.onControlUp(Controls.action))))
+				if(focusElement!=null && ((MenuControls.type==State.PRESS && focusElement.onControlDown(MenuControls.action)) || (MenuControls.type==State.RELEASE && focusElement.onControlUp(MenuControls.action))))
 					continue;
 				for(GUI current=lastGUI;current!=null;current=current.previous)
 				{
-					switch(Controls.type)
+					switch(MenuControls.type)
 					{
-					case LOCATION_PRESS:
-						current.doPress(Controls.index, Controls.x, Controls.y, Controls.action);
+					case PRESS_TARGET:
+						current.doPress(MenuControls.index, MenuControls.x, MenuControls.y, MenuControls.action);
 						break;
 					case LOCATION_RELEASE:
-						current.doRelease(Controls.index, Controls.x, Controls.y, Controls.action);
+						current.doRelease(MenuControls.index, MenuControls.x, MenuControls.y, MenuControls.action);
 						break;
 					case MOVE:
-						current.doMove(Controls.index, Controls.x, Controls.y, Controls.action);
+						current.doMove(MenuControls.index, MenuControls.x, MenuControls.y, MenuControls.action);
 						break;
 					case PRESS:
-						current.onControlDown(Controls.action);
+						current.onControlDown(MenuControls.action);
 						break;
 					case RELEASE:
-						current.onControlUp(Controls.action);
+						current.onControlUp(MenuControls.action);
 						break;
 					}
 				}

@@ -2,11 +2,25 @@ package kino.applet;
 
 import java.io.File;
 
+import org.lwjgl.opengl.Display;
+
 import kino.client.DisplayGUIHolder;
 
 
 public class Main {
 	public static void main(String[] args)
+	{
+		try
+		{
+			run(args);
+		}
+		catch(Throwable e)
+		{
+			try { Display.destroy(); } catch(Exception s2e) {}
+			e.printStackTrace();
+		}
+	}
+	public static void run(String[] args)
 	{
 		byte requestflags = 0;
 		File logFile = null;

@@ -48,7 +48,7 @@ public class WorldRenderer {
 	}
 	public static void renderHUD(World world)
 	{
-		textureTest.draw(null);
+		//textureTest.draw(null);
 	}
 	public static final Model kinoModel = Model.createModelOrNull("./res/model/kino_model.kbm");
 	public static final Model terrainModel = new MRandomTerrain(1000,1000);

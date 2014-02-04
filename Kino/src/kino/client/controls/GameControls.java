@@ -1,10 +1,8 @@
 package kino.client.controls;
 
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
-import kino.cache.Entity;
 import kino.client.gui.GUIGameView;
 import kino.util.NumericalTools;
 import kino.util.Vector3d;
@@ -13,7 +11,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 
-public class GameControls {
+public class GameControls implements ControlBindingManager {
 	static interface AnalogOutput{
 		String getDisplayName();
 		String getDescription();
@@ -156,6 +154,16 @@ public class GameControls {
 			return val;
 		};
 	};
+	private static final AnalogInput MouseScroll = new AnalogInput()
+	{
+		@Override
+		public String getDisplayName() { return "Mouse Scroll Wheel"; };
+		@Override
+		public String getDescription() { return "It should be fairly self-explanatory"; };
+		public double getAmount() {
+			return Mouse.getDWheel();
+		};
+	};
 	// Control binding
 	static class ControlBinding {
 		public ControlBinding(GameControls.AnalogOutput paramOutput, GameControls.AnalogInput paramInput, int[] paramConditions, double paramModifier) {
@@ -169,23 +177,38 @@ public class GameControls {
 		int conditions[];
 		double modifier = 1;
 	}
-	private static ControlBinding[] DEFAULT_CONTROLS = new ControlBinding[]{
+	private static ControlBinding[] DEFAULT_CONTROLS = new ControlBinding[]
+	{
+		//// WASD
+		// Basic Speed
+		new ControlBinding(KinoForwardsBackwards,null,new int[]{Keyboard.KEY_W,-Keyboard.KEY_LSHIFT},0.01),
+		new ControlBinding(KinoForwardsBackwards,null,new int[]{Keyboard.KEY_S,-Keyboard.KEY_LSHIFT},-0.01),
+		new ControlBinding(KinoLeftRight,null,new int[]{Keyboard.KEY_A,-Keyboard.KEY_LSHIFT},0.01),
+		new ControlBinding(KinoLeftRight,null,new int[]{Keyboard.KEY_D,-Keyboard.KEY_LSHIFT},-0.01),
+		new ControlBinding(KinoUpDown,null,new int[]{Keyboard.KEY_E,-Keyboard.KEY_LSHIFT},0.01),
+		new ControlBinding(KinoUpDown,null,new int[]{Keyboard.KEY_Q,-Keyboard.KEY_LSHIFT},-0.01),
+		// Extra Speed
+		new ControlBinding(KinoForwardsBackwards,null,new int[]{Keyboard.KEY_W,Keyboard.KEY_LSHIFT},0.2),
+		new ControlBinding(KinoForwardsBackwards,null,new int[]{Keyboard.KEY_S,Keyboard.KEY_LSHIFT},-0.2),
+		new ControlBinding(KinoLeftRight,null,new int[]{Keyboard.KEY_A,Keyboard.KEY_LSHIFT},0.2),
+		new ControlBinding(KinoLeftRight,null,new int[]{Keyboard.KEY_D,Keyboard.KEY_LSHIFT},-0.2),
+		new ControlBinding(KinoUpDown,null,new int[]{Keyboard.KEY_E,Keyboard.KEY_LSHIFT},0.2),
+		new ControlBinding(KinoUpDown,null,new int[]{Keyboard.KEY_Q,Keyboard.KEY_LSHIFT},-0.2),
+		//// Arrow Keys
 		new ControlBinding(KinoForwardsBackwards,null,new int[]{Keyboard.KEY_UP},0.01),
 		new ControlBinding(KinoForwardsBackwards,null,new int[]{Keyboard.KEY_DOWN},-0.01),
 		new ControlBinding(KinoLeftRight,null,new int[]{Keyboard.KEY_LEFT},1),
 		new ControlBinding(KinoLeftRight,null,new int[]{Keyboard.KEY_RIGHT},-1),
 		
-		new ControlBinding(KinoForwardsBackwards,null,new int[]{Keyboard.KEY_W},0.01),
-		new ControlBinding(KinoForwardsBackwards,null,new int[]{Keyboard.KEY_S},-0.01),
-		
-		new ControlBinding(KinoLeftRight,null,new int[]{Keyboard.KEY_A},0.01),
-		new ControlBinding(KinoLeftRight,null,new int[]{Keyboard.KEY_D},-0.01),
-		
-		new ControlBinding(KinoUpDown,null,new int[]{Keyboard.KEY_E},0.01),
-		new ControlBinding(KinoUpDown,null,new int[]{Keyboard.KEY_Q},-0.01),
-		
-		new ControlBinding(KinoYaw,MouseMotionX,null,-0.1),
-		new ControlBinding(KinoPitch,MouseMotionY,null,0.1),
+		//// Mouse
+		// Rotation
+		new ControlBinding(KinoYaw,MouseMotionX,new int[]{-Keyboard.KEY_SPACE},-0.1),
+		new ControlBinding(KinoPitch,MouseMotionY,new int[]{-Keyboard.KEY_SPACE},0.1),
+		// Position
+		new ControlBinding(KinoLeftRight,MouseMotionX,new int[]{Keyboard.KEY_SPACE},-0.01),
+		new ControlBinding(KinoForwardsBackwards,MouseMotionY,new int[]{Keyboard.KEY_SPACE},0.01),
+		// FOV Wheel
+		new ControlBinding(KinoFOV, MouseScroll, new int[]{-Keyboard.KEY_LSHIFT}, 0.01),
 	};
 	private static List<ControlBinding> analogControls = Arrays.asList(DEFAULT_CONTROLS);//new LinkedList<ControlBinding>();
 	private static Vector3d vectorCache = new Vector3d();
@@ -193,15 +216,13 @@ public class GameControls {
 	{
 		for(ControlBinding cb : analogControls)
 		{
-			if(cb.conditions==null || areKeysDown(cb.conditions))
+			if(cb.conditions==null || validateKeyConditions(cb.conditions))
 			{
 				double amount = cb.modifier;
 				if(cb.input!=null)
 					amount *= cb.input.getAmount();
 				if(amount!=0)
-				{
 					cb.output.addToVector(vectorCache, gameView, amount);
-				}
 			}
 		}
 		if(vectorCache.getMagnitudeSquared()!=0)
@@ -213,12 +234,22 @@ public class GameControls {
 			gameView.doRecalculate();
 		}
 	}
-	private static boolean areKeysDown(int[] keys)
+	private static boolean validateKeyConditions(int[] keys)
 	{
 		for(int key : keys)
 		{
-			if(!Keyboard.isKeyDown(key))
+			try
+			{
+				if(key<0 && Keyboard.isKeyDown(-key))
+					return false;
+				else if(key>0 && !Keyboard.isKeyDown(key))
+					return false;
+			}
+			catch(IndexOutOfBoundsException e)
+			{
+				System.out.println(key);
 				return false;
+			}
 		}
 		return true;
 	}

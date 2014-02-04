@@ -3,7 +3,7 @@ package kino.client.gui;
 import java.util.ArrayList;
 import java.util.List;
 
-import kino.client.controls.Controls;
+import kino.client.controls.MenuControls;
 
 public abstract class GUI {
 	private ScreenGUIHolder holder;
@@ -26,17 +26,17 @@ public abstract class GUI {
 	public void onExpose(){}
 	public void onCover(){}
 	public void onResize(){}
-	public boolean onPress(byte index, int x, int y, Controls.ControlAction action){return false;}
-	public boolean onMove(byte index, int x, int y, Controls.ControlAction action){return false;}
-	public boolean onRelease(byte index, int x, int y, Controls.ControlAction action){return false;}
-	public void onControlDown(Controls.ControlAction action){}
-	public void onControlUp(Controls.ControlAction action){}
+	public boolean onPress(byte index, int x, int y, MenuControls.Action action){return false;}
+	public boolean onMove(byte index, int x, int y, MenuControls.Action action){return false;}
+	public boolean onRelease(byte index, int x, int y, MenuControls.Action action){return false;}
+	public void onControlDown(MenuControls.Action action){}
+	public void onControlUp(MenuControls.Action action){}
 	// Final Events
 	public final void doOpen(){ isOpen = true; onOpen(); for(Element el : elements) el.onOpen(); }
 	public final void doClose(){ isOpen = false; isExposed = false; onClose(); for(Element el : elements) el.onClose(); }
 	public final void doExpose(){ isExposed = true; onExpose(); }
 	public final void doCover(){ isExposed = false; onCover(); }
-	public final void doPress(byte index, int x, int y, Controls.ControlAction action)
+	public final void doPress(byte index, int x, int y, MenuControls.Action action)
 	{
 		if(!onPress(index, x, y, action))
 		{
@@ -47,7 +47,7 @@ public abstract class GUI {
 			}
 		}
 	}
-	public final void doMove(byte index, int x, int y, Controls.ControlAction action)
+	public final void doMove(byte index, int x, int y, MenuControls.Action action)
 	{
 		if(!onMove(index, x, y, action))
 		{
@@ -58,7 +58,7 @@ public abstract class GUI {
 			}
 		}
 	}
-	public final void doRelease(byte index, int x, int y, Controls.ControlAction action)
+	public final void doRelease(byte index, int x, int y, MenuControls.Action action)
 	{
 		if(!onRelease(index, x, y, action))
 		{
