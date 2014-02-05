@@ -3,6 +3,7 @@ package kino.client.controls;
 import java.util.Arrays;
 import java.util.List;
 
+import kino.cache.Entity;
 import kino.client.gui.GUIGameView;
 import kino.util.NumericalTools;
 import kino.util.Vector3d;
@@ -11,116 +12,80 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 
-public class GameControls implements ControlBindingManager {
-	static interface AnalogOutput{
-		String getDisplayName();
-		String getDescription();
-		void addToVector(Vector3d out, GUIGameView gameView, double amount);
-	}
+public class GameControls extends ControlBindingManager {
+	public static Vector3d controlVectorMotionCache;
+	public static Entity controlEntity;
+	public static GUIGameView gameView;
 	public static final AnalogOutput KinoForwardsBackwards = new AnalogOutput() {
 		@Override
-		public String getDisplayName() { return "Kino Forwards/Backwards"; }
-		@Override
-		public String getDescription() { return "Moves the kino backwards/forwards along your line of sight"; }
-		@Override
-		public void addToVector(Vector3d out, GUIGameView gameView, double amount) {
-			out.add(
-				(Math.cos(Math.toRadians(gameView.controlEntity.vertRot)) * Math.sin(Math.toRadians(gameView.controlEntity.horzRot)))*amount,
-				(Math.sin(Math.toRadians(gameView.controlEntity.vertRot)))*amount,
-				(Math.cos(Math.toRadians(gameView.controlEntity.vertRot)) * Math.cos(Math.toRadians(gameView.controlEntity.horzRot)))*amount
+		public void post(double value) {
+			controlVectorMotionCache.add(
+				(Math.cos(Math.toRadians(controlEntity.vertRot)) * Math.sin(Math.toRadians(controlEntity.horzRot)))*value,
+				(Math.sin(Math.toRadians(controlEntity.vertRot)))*value,
+				(Math.cos(Math.toRadians(controlEntity.vertRot)) * Math.cos(Math.toRadians(controlEntity.horzRot)))*value
 			);
 		}
 	};
 	public static final AnalogOutput KinoUpDown = new AnalogOutput() {
 		@Override
-		public String getDisplayName() { return "Kino Up/Down"; }
-		@Override
-		public String getDescription() { return "Moves the kino up or down relative to where you're looking"; }
-		@Override
-		public void addToVector(Vector3d out, GUIGameView gameView, double amount) {
-			out.add(
-				(Math.cos(Math.toRadians(gameView.controlEntity.vertRot+90)) * Math.sin(Math.toRadians(gameView.controlEntity.horzRot)))*amount,
-				(Math.sin(Math.toRadians(gameView.controlEntity.vertRot+90)))*amount,
-				(Math.cos(Math.toRadians(gameView.controlEntity.vertRot+90)) * Math.cos(Math.toRadians(gameView.controlEntity.horzRot)))*amount
+		public void post(double value) {
+			controlVectorMotionCache.add(
+				(Math.cos(Math.toRadians(controlEntity.vertRot+90)) * Math.sin(Math.toRadians(controlEntity.horzRot)))*value,
+				(Math.sin(Math.toRadians(controlEntity.vertRot+90)))*value,
+				(Math.cos(Math.toRadians(controlEntity.vertRot+90)) * Math.cos(Math.toRadians(controlEntity.horzRot)))*value
 			);
 		}
 	};
 	public static final AnalogOutput KinoLeftRight = new AnalogOutput() {
 		@Override
-		public String getDisplayName() { return "Kino Left/Right"; }
-		@Override
-		public String getDescription() { return "Moves the kino left or right"; }
-		@Override
-		public void addToVector(Vector3d out, GUIGameView gameView, double amount) {
-			out.add(
-				Math.sin(Math.toRadians(gameView.controlEntity.horzRot+90))*amount,
+		public void post(double value) {
+			controlVectorMotionCache.add(
+				Math.sin(Math.toRadians(controlEntity.horzRot+90))*value,
 				0,
-				Math.cos(Math.toRadians(gameView.controlEntity.horzRot+90))*amount
+				Math.cos(Math.toRadians(controlEntity.horzRot+90))*value
 			);
 		}
 	};
 	public static final AnalogOutput KinoForwardsBackwardsHorizon = new AnalogOutput() {
 		@Override
-		public String getDisplayName() { return "Kino Forward/Back horizon"; }
-		@Override
-		public String getDescription() { return "Moves the kino towards or away from the horizon"; }
-		@Override
-		public void addToVector(Vector3d out, GUIGameView gameView, double amount) {
-			out.add(
-				Math.sin(Math.toRadians(gameView.controlEntity.horzRot)),
+		public void post(double value) {
+			controlVectorMotionCache.add(
+				Math.sin(Math.toRadians(controlEntity.horzRot)),
 				0,
-				Math.cos(Math.toRadians(gameView.controlEntity.horzRot))
+				Math.cos(Math.toRadians(controlEntity.horzRot))
 			);
 		}
 	};
 	public static final AnalogOutput WorldNorthSouth = new AnalogOutput() {
 		@Override
-		public String getDisplayName() { return "World North/South"; }
-		@Override
-		public String getDescription() { return "Moves the kino towards north or south"; }
-		@Override
-		public void addToVector(Vector3d out, GUIGameView gameView, double amount) { out.add(1,0,0); }
+		public void post(double value) { controlVectorMotionCache.add(1,0,0); }
 	};
 	public static final AnalogOutput WorldUpDown = new AnalogOutput() {
 		@Override
-		public String getDisplayName() { return "World Up/Down"; }
-		@Override
-		public String getDescription() { return "Moves the kino towards the sky or the floor"; }
-		@Override
-		public void addToVector(Vector3d out, GUIGameView gameView, double amount) { out.add(0,1,0); }
+		public void post(double value) { controlVectorMotionCache.add(0,1,0); }
 	};
 	public static final AnalogOutput WorldEastWest = new AnalogOutput() {
 		@Override
-		public String getDisplayName() { return "World East/West"; }
-		@Override
-		public String getDescription() { return "Moves the kino towards east or west"; }
-		@Override
-		public void addToVector(Vector3d out, GUIGameView gameView, double amount) { out.add(0,1,0); }
+		public void post(double value) { controlVectorMotionCache.add(0,1,0); }
 	};
 	public static final AnalogOutput KinoPitch = new AnalogOutput() {
 		@Override
-		public String getDisplayName() { return "Kino Pitch"; }
-		@Override
-		public String getDescription() { return "Tilts the kino up or down"; }
-		@Override
-		public void addToVector(Vector3d out, GUIGameView gameView, double amount) { gameView.controlEntity.vertRot=NumericalTools.capTo(-90, gameView.controlEntity.vertRot+amount, 90); gameView.doRecalculate(); }
+		public void post(double value) {
+			controlEntity.vertRot=NumericalTools.capTo(-90, controlEntity.vertRot+value, 90);
+			gameView.doRecalculate();
+		}
 	};
 	public static final AnalogOutput KinoYaw = new AnalogOutput() {
 		@Override
-		public String getDisplayName() { return "Kino Yaw"; }
-		@Override
-		public String getDescription() { return "Turns the kino around"; }
-		@Override
-		public void addToVector(Vector3d out, GUIGameView gameView, double amount) { gameView.controlEntity.horzRot=NumericalTools.wrapTo(0, gameView.controlEntity.horzRot+amount, 360); gameView.doRecalculate(); }
+		public void post(double value) {
+			controlEntity.horzRot=NumericalTools.wrapTo(0, controlEntity.horzRot+value, 360);
+			gameView.doRecalculate();
+		}
 	};
 	public static final AnalogOutput KinoFOV = new AnalogOutput() {
 		@Override
-		public String getDisplayName() { return "Kino FOV"; }
-		@Override
-		public String getDescription() { return "Increases or decreases the kinos viewing angle"; }
-		@Override
-		public void addToVector(Vector3d out, GUIGameView gameView, double amount) {
-			gameView.FOV += amount;
+		public void post(double value) {
+			gameView.FOV += value;
 			gameView.doRecalculate();
 		}
 	};

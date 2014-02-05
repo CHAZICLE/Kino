@@ -11,7 +11,7 @@ public class BasicAnalogControlBinding extends ControlBinding {
 	
 	@Override
 	public void forceInvoke() {
-		output.set(input.get()*multiplier);
+		output.post(input.get()*multiplier);
 	}
 	
 }

@@ -1,9 +1,47 @@
 package kino.client.controls;
 
+import kino.client.gui.GUI;
+
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
-public abstract class MenuControls implements ControlBindingManager {
+public abstract class MenuControls extends ControlBindingManager {
+	public static GUI rootGUI;
+	public static final DigitalOutput SELECT = new DigitalOutput()
+	{
+		@Override
+		public void onPress() { rootGUI.onControlDown(Action.SELECT); }
+		@Override
+		public void onRelease() { rootGUI.onControlUp(Action.SELECT); }
+	};
+	public static final DigitalOutput MENU = new DigitalOutput()
+	{
+		@Override
+		public void onPress() { rootGUI.onControlDown(Action.MENU); }
+		@Override
+		public void onRelease() { rootGUI.onControlUp(Action.MENU); }
+	};
+	public static final DigitalOutput BACK = new DigitalOutput()
+	{
+		@Override
+		public void onPress() { rootGUI.onControlDown(Action.BACK); }
+		@Override
+		public void onRelease() { rootGUI.onControlUp(Action.BACK); }
+	};
+	public static final DigitalOutput NEXT = new DigitalOutput()
+	{
+		@Override
+		public void onPress() { rootGUI.onControlDown(Action.NEXT); }
+		@Override
+		public void onRelease() { rootGUI.onControlUp(Action.NEXT); }
+	};
+	public static final DigitalOutput PREVIOUS = new DigitalOutput()
+	{
+		@Override
+		public void onPress() { rootGUI.onControlDown(Action.PREVIOUS); }
+		@Override
+		public void onRelease() { rootGUI.onControlUp(Action.PREVIOUS); }
+	};
 	public static enum State {
 		PRESS,RELEASE,PRESS_TARGET,RELEASE_TARGET,MOVE;
 	}

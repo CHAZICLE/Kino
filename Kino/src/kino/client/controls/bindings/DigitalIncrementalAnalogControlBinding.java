@@ -11,6 +11,6 @@ public class DigitalIncrementalAnalogControlBinding extends ControlBinding {
 	@Override
 	public void forceInvoke() {
 		if(input.get()==!invert)
-			output.set(value);
+			output.post(value);
 	}
 }
