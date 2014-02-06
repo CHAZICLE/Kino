@@ -1,14 +1,13 @@
 package kino.client.controls.bindings;
 
-import kino.client.controls.ControlBindingManager;
 
 public abstract class ControlBinding {
 	private long lastTick = -1;
-	public void invoke(ControlBindingManager manager)
+	public void invoke(long tick)
 	{
-		if(manager.tick==lastTick)
+		if(tick==lastTick)
 			return;
-		lastTick = manager.tick;
+		lastTick = tick;
 		forceInvoke();
 	}
 	public abstract void forceInvoke();

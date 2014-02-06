@@ -1,6 +1,7 @@
 package kino.client.controls;
 
 import java.util.Arrays;
+
 import java.util.List;
 
 import kino.cache.Entity;
@@ -12,7 +13,8 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 
-public class GameControls extends ControlBindingManager {
+@Deprecated
+public class GameControls {
 	public static Vector3d controlVectorMotionCache;
 	public static Entity controlEntity;
 	public static GUIGameView gameView;

@@ -1,32 +1,38 @@
 package kino.client.controls;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import kino.client.controls.bindings.ControlBinding;
-
-public abstract class ControlBindingManager {
-	public int tick = 0;
-	private ControlInputManager[] _controlinputs = new ControlInputManager[] {
-		new LWJGLControlInputsManager()
-	};
-	public List<ControlBinding> bindings = new ArrayList<ControlBinding>();
-	public List<ControlInputManager> inputsHolders = Arrays.asList(_controlinputs);
+/**
+ * Holds the key bindings, stores the input managers
+ * THERE CAN BE ONLY ONE
+ */
+public class ControlBindingManager {
+	private static long tick = 0;
+	
+	private static LinkedList<ControlOutputHolder> outputHolders = new LinkedList<ControlOutputHolder>();
+	private static LinkedList<ControlInputHolder> inputHolders = new LinkedList<ControlInputHolder>();
+	
+	private List<ControlBinding> bindings = new ArrayList<ControlBinding>();
 	boolean rawInput = false;
 	/**
-	 * Called by the root gui manager to update the controls
+	 * Called by the root GUI manager to update the controls
 	 */
 	public void tickControls()
 	{
 		tick++;
 		if(!rawInput)
 		{
-			for(ControlInputManager cih : inputsHolders)
+			for(ControlInputHolder cih : inputHolders)
 			{
-				cih.pollEvents();
+				cih.tickEvents(tick);
 			}
 		}
-		
+		for(ControlBinding cb : bindings)
+		{
+			cb.invoke(tick);
+		}
 	}
 }

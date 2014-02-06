@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import kino.client.controls.ControlInputManager;
+import kino.client.controls.ControlInputHolder;
 import kino.client.controls.DigitalInput;
 
-public class NetworkControlsManager implements ControlInputManager,Runnable {
+public class NetworkControlsManager implements ControlInputHolder,Runnable {
 	private Thread networkControlServerThread;
 	private ServerSocket server;
 	public void enable()
@@ -28,12 +28,12 @@ public class NetworkControlsManager implements ControlInputManager,Runnable {
 		}
 	}
 	@Override
-	public void pollEvents() {
+	public void tickEvents() {
 		
 	}
 
 	@Override
-	public DigitalInput readInput() {
+	public DigitalInput readDigitalInput() {
 		return null;
 	}
 	@Override

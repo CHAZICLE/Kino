@@ -8,7 +8,7 @@ import java.util.Map;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
-public class LWJGLControlInputsManager implements ControlInputManager {
+public class LWJGLControlInputsHolder implements ControlInputHolder {
 	public int storedKey = -1;
 	public boolean keystate = false;
 	public int mouseButton = -1;
@@ -64,7 +64,7 @@ public class LWJGLControlInputsManager implements ControlInputManager {
 			throw new IllegalArgumentException("Unknown input");
 		}
 	}
-	class LWJGLKeyboardDigitalInput extends DigitalInput{
+	class LWJGLKeyboardDigitalInput extends DigitalInput {
 		int key;
 		@Override
 		public boolean get() {
@@ -75,7 +75,7 @@ public class LWJGLControlInputsManager implements ControlInputManager {
 			return Keyboard.getKeyName(key);
 		}
 	}
-	class LWJGLMouseButtonDigitalInput extends DigitalInput{
+	class LWJGLMouseButtonDigitalInput extends DigitalInput {
 		int button;
 		@Override
 		public boolean get() {
@@ -86,17 +86,10 @@ public class LWJGLControlInputsManager implements ControlInputManager {
 			return Mouse.getButtonName(button);
 		}
 	}
-	@Override
-	public void pollEvents() {
-		while(read())
-		{
-			
-		}
-	}
 	Map<Integer,LWJGLKeyboardDigitalInput> keymapCache = new HashMap<Integer,LWJGLKeyboardDigitalInput>();
 	LWJGLMouseButtonDigitalInput[] storedButtonInputs = new LWJGLMouseButtonDigitalInput[Mouse.getButtonCount()];
 	@Override
-	public DigitalInput readInput() {
+	public DigitalInput readDigitalInput() {
 		while(Keyboard.next())
 		{
 			if(Keyboard.getEventKeyState())
@@ -126,5 +119,45 @@ public class LWJGLControlInputsManager implements ControlInputManager {
 			}
 		}
 		return null;
+	}
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public int digitalSize() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public int analogSize() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public String getDigitalName(int i) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public String getAnalogName(int i) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public DigitalOutput getDigital(int i) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public AnalogOutput getAnalog(int i) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public void tickEvents(long tick) {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -5,7 +5,7 @@ import kino.client.gui.GUI;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
-public abstract class MenuControls extends ControlBindingManager {
+public abstract class MenuControls {
 	public static GUI rootGUI;
 	public static final DigitalOutput SELECT = new DigitalOutput()
 	{
