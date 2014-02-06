@@ -14,7 +14,9 @@ public class ControlBindingManager {
 	
 	private static LinkedList<ControlOutputHolder> outputHolders = new LinkedList<ControlOutputHolder>();
 	private static LinkedList<ControlInputHolder> inputHolders = new LinkedList<ControlInputHolder>();
-	
+	static {
+		inputHolders.add(new LWJGLControlInputsHolder());
+	}
 	private List<ControlBinding> bindings = new ArrayList<ControlBinding>();
 	boolean rawInput = false;
 	/**
