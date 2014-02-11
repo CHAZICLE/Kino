@@ -16,6 +16,12 @@ public class ControlBindingManager {
 	 * The currently detected output holders
 	 */
 	private static LinkedList<ControlInputHolder> inputHolders = new LinkedList<ControlInputHolder>();
+
+	static {
+		inputHolders.add(new LWJGLControlInputsHolder());
+	}
+	private List<ControlBinding> bindings = new ArrayList<ControlBinding>();
+	boolean rawInput = false;
 	/**
 	 * The currently loaded profiles
 	 */
