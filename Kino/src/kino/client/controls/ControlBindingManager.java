@@ -1,8 +1,6 @@
 package kino.client.controls;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
 import kino.client.controls.bindings.ControlBinding;
 /**
@@ -10,29 +8,68 @@ import kino.client.controls.bindings.ControlBinding;
  * THERE CAN BE ONLY ONE
  */
 public class ControlBindingManager {
-	private static long tick = 0;
-	
-	private static LinkedList<ControlOutputHolder> outputHolders = new LinkedList<ControlOutputHolder>();
-	private static LinkedList<ControlInputHolder> inputHolders = new LinkedList<ControlInputHolder>();
-	
-	private List<ControlBinding> bindings = new ArrayList<ControlBinding>();
-	boolean rawInput = false;
 	/**
-	 * Called by the root GUI manager to update the controls
+	 * The currently registered output holders
 	 */
-	public void tickControls()
+	private static LinkedList<ControlOutputHolder> outputHolders = new LinkedList<ControlOutputHolder>();
+	/**
+	 * The currently detected output holders
+	 */
+	private static LinkedList<ControlInputHolder> inputHolders = new LinkedList<ControlInputHolder>();
+	/**
+	 * The currently loaded profiles
+	 */
+	private static LinkedList<ControlProfile> profiles = new LinkedList<ControlProfile>();
+	private static long tick = 1;
+	private static int inputScanDelay = 1000;
+	private static boolean processEvents = false;
+	/**
+	 * Ticks the controls
+	 */
+	public void tick()
 	{
-		tick++;
-		if(!rawInput)
+		for(ControlProfile controlProfile : profiles)
 		{
-			for(ControlInputHolder cih : inputHolders)
+			for(ControlBinding controlBinding : controlProfile)
 			{
-				cih.tickEvents(tick);
+				controlBinding.invoke(tick);
 			}
 		}
-		for(ControlBinding cb : bindings)
+		if(tick%inputScanDelay==0)
 		{
-			cb.invoke(tick);
+			scanForInputHolders();
 		}
+		tick++;
+	}
+	public void registerOutputHolder(ControlOutputHolder coh)
+	{
+		outputHolders.add(coh);
+	}
+	public void scanForInputHolders() { scanForInputHolders(true); }
+	public void scanForInputHolders(boolean refreshAfter)
+	{
+		if(refreshAfter)
+			reloadProfiles();
+	}
+	/**
+	 * Loads any control profiles if their dependencies are met
+	 */
+	public void reloadProfiles()
+	{
+		
+	}
+	/**
+	 * Returns a output holder given a name if it's loaded
+	 */
+	public ControlOutputHolder getOutputHolder(String name)
+	{
+		
+	}
+	/**
+	 * Returns an input holder given a name if it's loaded
+	 */
+	public ControlInputHolder getInputHolder(String name)
+	{
+		
 	}
 }

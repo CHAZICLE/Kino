@@ -81,7 +81,7 @@ public class JoystickControlInputHolder implements ControlInputHolder {
 	}
 
 	@Override
-	public DigitalInput readDigitalInput() {
+	public DigitalInput readNewDigitalInput() {
 		return null;
 	}
 }

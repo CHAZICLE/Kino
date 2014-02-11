@@ -1,69 +1,13 @@
 package kino.client.controls;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
 
-public class LWJGLControlInputsHolder implements ControlInputHolder {
-	public int storedKey = -1;
-	public boolean keystate = false;
-	public int mouseButton = -1;
-	public boolean mouseButtonState = false;
-	public int mouseX,mouseY,mouseDX,mouseDY,mouseDZ;
-	
-	/**
-	 * Called at the start of every control thread tick to post keyboard/mouse events if enabled
-	 */
-	public boolean read()
-	{
-		if(Keyboard.next())
-		{
-			storedKey = Keyboard.getEventKey();
-			keystate = Keyboard.getEventKeyState();
-			return true;
-		}
-		else if(Mouse.next())
-		{
-			mouseButton = Mouse.getEventButton();
-			mouseButtonState = Mouse.getEventButtonState();
-			mouseX = Mouse.getEventX();
-			mouseY = Mouse.getEventY();
-			mouseDX = Mouse.getEventDX();
-			mouseDY = Mouse.getEventDY();
-			mouseDZ = Mouse.getEventDWheel();
-			return true;
-		}
-		return false;
-	}
-	public String[] getDigitalInputNames()
-	{
-		LinkedList<String> names = new LinkedList<String>();
-		Field[] keys = Keyboard.class.getFields();
-		for(Field key : keys)
-		{
-			if(key.getName().startsWith("KEY_"))
-				names.add(key.getName());
-		}
-		return (String[]) names.toArray();
-	}
-	public DigitalInput getDigitalInput(int index)
-	{
-		try
-		{
-			Field key = Keyboard.class.getFields()[index];
-			LWJGLKeyboardDigitalInput ldi = new LWJGLKeyboardDigitalInput();
-			ldi.key = key.getInt(null);
-			return ldi;
-		}
-		catch(ArrayIndexOutOfBoundsException|IllegalArgumentException|IllegalAccessException e)
-		{
-			throw new IllegalArgumentException("Unknown input");
-		}
-	}
+public class LWJGLControlInputsHolder extends ControlInputHolder {
 	class LWJGLKeyboardDigitalInput extends DigitalInput {
 		int key;
 		@Override
@@ -86,78 +30,125 @@ public class LWJGLControlInputsHolder implements ControlInputHolder {
 			return Mouse.getButtonName(button);
 		}
 	}
-	Map<Integer,LWJGLKeyboardDigitalInput> keymapCache = new HashMap<Integer,LWJGLKeyboardDigitalInput>();
-	LWJGLMouseButtonDigitalInput[] storedButtonInputs = new LWJGLMouseButtonDigitalInput[Mouse.getButtonCount()];
-	@Override
-	public DigitalInput readDigitalInput() {
-		while(Keyboard.next())
-		{
-			if(Keyboard.getEventKeyState())
-			{
-				int key = Keyboard.getEventKey();
-				LWJGLKeyboardDigitalInput ldi = keymapCache.get(Integer.valueOf(key));
-				if(ldi==null)
-				{
-					keymapCache.put(Integer.valueOf(key),ldi = new LWJGLKeyboardDigitalInput());
-					ldi.key = Keyboard.getEventKey();
-				}
-				return ldi;
-			}
-		}
-		while(Mouse.next())
-		{
-			if(Mouse.getEventButton()>=0 && Mouse.getEventButtonState())//Some button => DigitalInput
-			{
-				int button = Mouse.getEventButton();
-				LWJGLMouseButtonDigitalInput lmbdi = storedButtonInputs[button];
-				if(lmbdi==null)
-				{
-					storedButtonInputs[button] = lmbdi = new LWJGLMouseButtonDigitalInput();
-					lmbdi.button = button;
-				}
-				return lmbdi;
-			}
-		}
-		return null;
-	}
+	private HashMap<Integer,DigitalInput> digitalInputCache = new HashMap<Integer,DigitalInput>();
+	private AnalogInput[] analogInputCache = new AnalogInput[5];
+	
+	// Methods
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Keyboard & Mouse";
 	}
 	@Override
 	public int digitalSize() {
-		// TODO Auto-generated method stub
-		return 0;
+		return Keyboard.getKeyCount()+Mouse.getButtonCount();
 	}
 	@Override
 	public int analogSize() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 3;
 	}
 	@Override
 	public String getDigitalName(int i) {
-		// TODO Auto-generated method stub
-		return null;
+		if(0<=i && i<Keyboard.getKeyCount())
+			return Keyboard.getKeyName(i);
+		else
+			return Mouse.getButtonName(i-Keyboard.getKeyCount());
 	}
 	@Override
 	public String getAnalogName(int i) {
-		// TODO Auto-generated method stub
+		switch(i)
+		{
+		case 0:
+			return "Mouse X-Axis position";
+		case 1:
+			return "Mouse Y-Axis position";
+		case 2:
+			return "Mouse Relative Scroll";
+		case 3:
+			return "Mouse X-Axis speed";
+		case 4:
+			return "Mouse Y-Axis speed";
+		}
 		return null;
 	}
 	@Override
-	public DigitalOutput getDigital(int i) {
-		// TODO Auto-generated method stub
+	public DigitalInput getDigital(int i) {
+		DigitalInput di = null;
+		if(0<=i && i<Keyboard.getKeyCount())
+		{
+			Map<Integer,Object> somefink = null;
+			di = new LWJGLKeyboardDigitalInput();
+			((LWJGLKeyboardDigitalInput)di).key = i;
+		}
+		else
+		{
+			di = new LWJGLMouseButtonDigitalInput();
+			((LWJGLMouseButtonDigitalInput)di).button = i-Keyboard.getKeyCount();
+		}
 		return null;
 	}
 	@Override
-	public AnalogOutput getAnalog(int i) {
-		// TODO Auto-generated method stub
-		return null;
+	public AnalogInput getAnalog(final int i) {
+		try
+		{
+			if(analogInputCache[i]!=null)
+				return analogInputCache[i];
+		}
+		catch(IndexOutOfBoundsException e)
+		{
+			return null;
+		}
+		switch(i)
+		{
+		case 0:
+			return analogInputCache[0]=new AnalogInput(){
+				@Override
+				public double get() { return Mouse.getX(); }
+				@Override
+				public String getName() { return "Mouse X-Axis position"; }
+			};
+		case 1:
+			return analogInputCache[1]=new AnalogInput(){
+				@Override
+				public double get() { return Mouse.getY(); }
+				@Override
+				public String getName() { return "Mouse Y-Axis position"; }
+			};
+		case 2:
+			return analogInputCache[2]=new AnalogInput(){
+				@Override
+				public double get() { return Mouse.getDWheel(); }
+				@Override
+				public String getName() { return "Mouse Relative Scroll"; }
+			};
+		case 3:
+			return analogInputCache[3]=new AnalogInput(){
+				@Override
+				public double get() { return Mouse.getX()-Display.getWidth()/2; }
+				@Override
+				public String getName() { return "Mouse X-Axis speed"; }
+			};
+		case 4:
+			return analogInputCache[4]=new AnalogInput(){
+				@Override
+				public double get() { return Mouse.getY()-Display.getHeight()/2; }
+				@Override
+				public String getName() { return "Mouse Y-Axis speed"; }
+			};
+		default:
+			return null;
+		}
 	}
 	@Override
-	public void tickEvents(long tick) {
-		// TODO Auto-generated method stub
-		
+	public void processEvents(long tick) {
+		while(Mouse.next())
+		{
+			
+		}
 	}
+	@Override
+	public DigitalInput readNewDigitalInput() {
+		return null;
+	}
+	
+	
 }

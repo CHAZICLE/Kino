@@ -1,23 +1,26 @@
 package kino.client.controls;
 
 /**
- * Abstract class for handling a branch of inputs
+ * Handles a branch of inputs. E.g. Keyboard & Mouse, Controllers etc
+ * 
  */
-public interface ControlInputHolder {
-	public String getName();
-	public int digitalSize();
-	public int analogSize();
-	public String getDigitalName(int i);
-	public String getAnalogName(int i);
-	public DigitalOutput getDigital(int i);
-	public AnalogOutput getAnalog(int i);
+public abstract class ControlInputHolder {
+	public String getName(){return "Unknown Input";}
+	public int digitalSize(){return 0;}
+	public int analogSize(){return 0;}
+	public String getDigitalName(int i){return "Unknown";}
+	public String getAnalogName(int i){return "Unknown";}
+	public DigitalInput getDigital(int i){return null;}
+	public AnalogInput getAnalog(int i){return null;}
 	/**
-	 * Updated any controls based on any stored events
-	 */
-	public void tickEvents(long tick);
-	/**
-	 * Pulls a newly created digital input from the event cache
+	 * Pulls a newly created digital input 
 	 * @return The new digital input or NULL if no events were fired
 	 */
-	public DigitalInput readDigitalInput();
+	public DigitalInput readNewDigitalInput() { return null; }
+	/**
+	 * Processes any pending events in this branch of controls.
+	 * 
+	 * @param tick The current tick
+	 */
+	public abstract void processEvents(long tick);
 }
