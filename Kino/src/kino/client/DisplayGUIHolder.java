@@ -1,7 +1,5 @@
 package kino.client;
 
-import kino.client.controls.MenuControls;
-import kino.client.controls.MenuControls.State;
 import kino.client.gui.Element;
 import kino.client.gui.GUI;
 import kino.client.gui.GUIMainMenu;
@@ -39,33 +37,7 @@ public class DisplayGUIHolder extends Thread implements ScreenGUIHolder {
 			if(firstGUI==null || lastGUI==null)
 				break;
 			// Controls
-			while(MenuControls.next())
-			{
-				if(focusElement!=null && ((MenuControls.type==State.PRESS && focusElement.onControlDown(MenuControls.action)) || (MenuControls.type==State.RELEASE && focusElement.onControlUp(MenuControls.action))))
-					continue;
-				for(GUI current=lastGUI;current!=null;current=current.previous)
-				{
-					switch(MenuControls.type)
-					{
-					case PRESS_TARGET:
-						current.doPress(MenuControls.index, MenuControls.x, MenuControls.y, MenuControls.action);
-						break;
-					case LOCATION_RELEASE:
-						current.doRelease(MenuControls.index, MenuControls.x, MenuControls.y, MenuControls.action);
-						break;
-					case MOVE:
-						current.doMove(MenuControls.index, MenuControls.x, MenuControls.y, MenuControls.action);
-						break;
-					case PRESS:
-						current.onControlDown(MenuControls.action);
-						break;
-					case RELEASE:
-						current.onControlUp(MenuControls.action);
-						break;
-					}
-				}
-			}
-			// Game Controls
+			//ControlsManager.tick();
 			
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			double interpolation = getDelta();
