@@ -1,5 +1,11 @@
 package kino.client.bindings;
 
-public class ControlBinding {
+import java.io.DataInputStream;
 
+public abstract class ControlBinding {
+
+	public static ControlBinding load(DataInputStream dis) {
+		return null;
+	}
+	
 }

@@ -1,5 +1,7 @@
 package kino.client.bindings;
 
-public class AnalogInput {
-
+public abstract class AnalogInput extends Input {
+	public abstract boolean getValue();
+	public abstract boolean getCurrentValue();
+	public abstract boolean getEventValue();
 }

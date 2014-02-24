@@ -1,5 +1,8 @@
 package kino.client.bindings;
 
-public class Output {
-
+/**
+ * Abstract class that handles an output
+ */
+public abstract class Output extends Put {
+	
 }
