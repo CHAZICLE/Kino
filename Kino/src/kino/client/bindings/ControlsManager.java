@@ -1,64 +1,88 @@
 package kino.client.bindings;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class ControlsManager {
-	public static final File profilesFolder = new File("./res/controls/");
-	static {
-		if (!profilesFolder.exists())
-			profilesFolder.mkdirs();
-	}
-	private static ArrayList<ControlInputHolder> inputHolders = new ArrayList<ControlInputHolder>();
-	private static ArrayList<ControlOutputHolder> outputHolders = new ArrayList<ControlOutputHolder>();
-	private static ArrayList<ControlProfile> loadedProfiles = new ArrayList<ControlProfile>();
+	private static List<ControlInputScanner> scanners = new ArrayList<>();
+	private static Map<String, ControlOutputHolder> outputHolders = new HashMap<>();
+	private static Map<String, ControlInputHolder> inputHolders = new HashMap<>();
 
-	/**
-	 * Scans for inputs that might have appeared
-	 */
+	public static void registerInputScanner(ControlInputScanner scanner) {
+		synchronized (scanners) {
+			scanners.add(scanner);
+		}
+	}
+
 	public static void scanInputs() {
-
-	}
-
-	/**
-	 * Initialize the inputs
-	 */
-	public static void init() {
-
-	}
-
-	/**
-	 * Clears and reloads the profiles based on the current inputs/output
-	 * holders
-	 */
-	public static void reloadProfiles() {
-
-	}
-
-	/**
-	 * Called when the GUI structure adds an element that can be controlled
-	 * 
-	 * @param newOutputHolder
-	 */
-	public static void registerOutputHolder(ControlOutputHolder newOutputHolder) {
-
-	}
-
-	public static void tick() {
-		// Process Events
-		for (ControlInputHolder inputHolder : inputHolders) {
-			Input event;
-			while ((event = inputHolder.fetchEvent()) != null)
-				event.invokeEvent();
-		}
-		// Process Raw
-		for (ControlProfile controlProfile : loadedProfiles) {
-			controlProfile.tick();
+		synchronized (scanners) {
+			Iterator<ControlInputScanner> it = scanners.iterator();
+			while (it.hasNext()) {
+				ControlInputHolder controlInputHolder = it.next().scan();
+				if (controlInputHolder != null) {
+					synchronized (inputHolders) {
+						inputHolders.put(controlInputHolder.getName(), controlInputHolder);
+					}
+				}
+			}
 		}
 	}
 
-	public static ControlBinding[] readBindings(FileInputStream fis) {
-		return null;
+	public static void verifyInputs() {
+		synchronized (inputHolders) {
+			Iterator<ControlInputHolder> it = inputHolders.values().iterator();
+			while (it.hasNext()) {
+				ControlInputHolder controlInputHolder = it.next();
+				if (!controlInputHolder.isStillActive())
+					it.remove();
+			}
+		}
+	}
+
+	public static void registerOutputHolder(ControlOutputHolder controlOutputHolder) {
+		synchronized (outputHolders) {
+			outputHolders.put(controlOutputHolder.getName(), controlOutputHolder);
+		}
+	}
+
+	public static void unregisterOutputHolder(ControlOutputHolder controlOutputHolder) {
+		controlOutputHolder.remove();
+	}
+
+	public static ControlInputHolder getInputHolder(String name) {
+		return inputHolders.get(name);
+	}
+
+	public static ControlOutputHolder getOutputHolder(String name) {
+		return outputHolders.get(name);
+	}
+
+	// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static List<ControlProfile> inactiveProfiles = new LinkedList<>();
+	private static List<ControlProfile> activeProfiles = new LinkedList<>();
+
+	public static void loadProfiles() {
+		// @IMPLEMENTATION_FILES
+		File files = new File("./res/profiles");
+		for (File f : files.listFiles()) {
+			synchronized (inactiveProfiles) {
+				inactiveProfiles.add(new ControlProfile(f));
+			}
+		}
+	}
+
+	public static void checkProfiles() {
+
+	}
+
+	public static void clearProfiles() {
+		inactiveProfiles.clear();
+		activeProfiles.clear();
 	}
 }

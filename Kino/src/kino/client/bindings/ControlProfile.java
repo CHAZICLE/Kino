@@ -10,23 +10,20 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
-public class ControlProfile implements Iterable<String> {
-	class BindingsNotLoadedException extends IllegalStateException {
-		private static final long serialVersionUID = -238891899449980600L;
-	}
+public class ControlProfile {
 
 	private long fileMetaEndPosition = 0;
 	private File profileFile;
-
-	// META
+	// STATE
 	private boolean metaLoaded;
-	private String name;
-	private Set<String> dependencies = null;
-	// DATA
 	private boolean dataLoaded;
+	private boolean active;
+	// META
+	private String name;
+	private HashSet<String> inputHolders;
+	private HashSet<String> outputHolders;
+	// DATA
 	private ControlBinding[] rawBindings;
 
 	public ControlProfile(File profileFile) {
@@ -49,19 +46,31 @@ public class ControlProfile implements Iterable<String> {
 		try (FileInputStream fis = new FileInputStream(profileFile)) {
 			DataInputStream dis = new DataInputStream(fis);
 			InputStreamReader isr = new InputStreamReader(fis, "UTF-16LE");
+			// Read the name
 			char[] cbuf = new char[dis.readInt()];
 			isr.read(cbuf);
 			name = new String(cbuf);
-			// Read the dependencies
-			int depSize = dis.readInt();
-			dependencies = new HashSet<String>();
+			fileMetaEndPosition += 4 + name.length() * 2;
+			// Read the input dependencies
+			int depSize = dis.read();
+			inputHolders = new HashSet<String>();
 			fileMetaEndPosition = 0;
 			for (int i = 0; i < depSize; i++) {
 				cbuf = new char[dis.readInt()];
-				dependencies.add(new String(cbuf));
+				inputHolders.add(new String(cbuf));
+				isr.read(cbuf);
 				fileMetaEndPosition += 4 + cbuf.length * 2;
 			}
-			fileMetaEndPosition += 4 + name.length() * 2;
+			// Read the output dependencies
+			depSize = dis.read();
+			outputHolders = new HashSet<String>();
+			fileMetaEndPosition = 0;
+			for (int i = 0; i < depSize; i++) {
+				cbuf = new char[dis.readInt()];
+				outputHolders.add(new String(cbuf));
+				isr.read(cbuf);
+				fileMetaEndPosition += 4 + cbuf.length * 2;
+			}
 		} catch (FileNotFoundException e) {
 			/* Shouldn't happen */
 		} catch (IOException e) {
@@ -69,38 +78,16 @@ public class ControlProfile implements Iterable<String> {
 		}
 	}
 
-	/**
-	 * Gets the display name of this profile
-	 * 
-	 * @return
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * Gets the number of dependencies this profile has
-	 */
-	public int getDependencySize() {
-		return dependencies.size();
-	}
-
-	/**
-	 * Gets the dependency iterator
-	 */
-	public Iterator<String> iterator() {
-		return dependencies.iterator();
-	}
-
-	/**
-	 * Determines if this control profile has a dependency
-	 * 
-	 * @param dep
-	 *            The dependecy
-	 * @return True if this profile has the specified dependency
-	 */
-	public boolean hasDependency(String dep) {
-		return dependencies.contains(dep);
+	public boolean checkDependencies() {
+		for (String dep : inputHolders) {
+			if (ControlsManager.getInputHolder(dep) == null)
+				return false;
+		}
+		for (String dep : outputHolders) {
+			if (ControlsManager.getOutputHolder(dep) == null)
+				return false;
+		}
+		return true;
 	}
 
 	/**
@@ -154,9 +141,8 @@ public class ControlProfile implements Iterable<String> {
 	 * manager and the input)
 	 */
 	public void tick() {
-		for(ControlBinding cb : rawBindings)
-		{
-			
+		for (ControlBinding cb : rawBindings) {
+
 		}
 	}
 
