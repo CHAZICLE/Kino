@@ -1,5 +1,8 @@
 package kino.client;
 
+import kino.client.bindings.ControlGUIOutputs;
+import kino.client.bindings.ControlGUIOutputs.Action;
+import kino.client.bindings.ControlsManager;
 import kino.client.gui.Element;
 import kino.client.gui.GUI;
 import kino.client.gui.GUIMainMenu;
@@ -32,12 +35,13 @@ public class DisplayGUIHolder extends Thread implements ScreenGUIHolder {
 		
 		RenderUtils.preload();
 		WorldRenderer.preload();
+		ControlsManager.registerOutputHolder(new ControlGUIOutputs(this,"Game Menu"));
 		while(!Thread.interrupted() && !Display.isCloseRequested())
 		{
 			if(firstGUI==null || lastGUI==null)
 				break;
 			// Controls
-			//ControlsManager.tick();
+			ControlsManager.doControlLoop();
 			
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			double interpolation = getDelta();
@@ -153,5 +157,12 @@ public class DisplayGUIHolder extends Thread implements ScreenGUIHolder {
 		Element e2 = blurElement();
 		focusElement = e;
 		return e2;
+	}
+	@Override
+	public void onAction(Action action, boolean press) {
+		if(press)
+			lastGUI.onControlDown(action);
+		else
+			lastGUI.onControlUp(action);
 	}
 }

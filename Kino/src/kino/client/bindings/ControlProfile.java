@@ -13,12 +13,17 @@ import java.util.HashSet;
 
 public class ControlProfile {
 
+	public static final int PROFILE_MAGIC = 2117645231;
+	public static final int CURRENT_PROFILE_VERSION = 1;
+
 	private long fileMetaEndPosition = 0;
 	private File profileFile;
 	// STATE
 	private boolean metaLoaded;
 	private boolean dataLoaded;
 	private boolean active;
+	public void setActive(boolean b){active = b;}
+	public boolean isActive(){return active;}
 	// META
 	private String name;
 	private HashSet<String> inputHolders;
@@ -33,7 +38,6 @@ public class ControlProfile {
 
 	public ControlProfile(String name) {
 		this.name = name;
-
 	}
 
 	/**
@@ -44,13 +48,23 @@ public class ControlProfile {
 			return;
 		metaLoaded = true;
 		try (FileInputStream fis = new FileInputStream(profileFile)) {
+			@SuppressWarnings("resource")
 			DataInputStream dis = new DataInputStream(fis);
+			if (PROFILE_MAGIC != dis.readInt()) {
+				// Unknown file type - Abandon Ship.
+				throw new IllegalArgumentException("Unknown profile filetype!");
+			}
+			if (CURRENT_PROFILE_VERSION != dis.readInt()) {
+				// Unknown version - Abandon Ship.
+				throw new IllegalArgumentException("Unknown version! (TODO: Legacy version loader code)");
+			}
+			@SuppressWarnings("resource")
 			InputStreamReader isr = new InputStreamReader(fis, "UTF-16LE");
 			// Read the name
 			char[] cbuf = new char[dis.readInt()];
 			isr.read(cbuf);
 			name = new String(cbuf);
-			fileMetaEndPosition += 4 + name.length() * 2;
+			fileMetaEndPosition += 12 + name.length() * 2;
 			// Read the input dependencies
 			int depSize = dis.read();
 			inputHolders = new HashSet<String>();
@@ -89,6 +103,14 @@ public class ControlProfile {
 		}
 		return true;
 	}
+	
+	public boolean hasOutputDependency(String outputName) {
+		return outputHolders.contains(outputName);
+	}
+	
+	public boolean hasInputDependency(String inputName) {
+		return inputHolders.contains(inputName);
+	}
 
 	/**
 	 * Loads the bindings from the file NOTE: This methods MUST be called before
@@ -100,10 +122,8 @@ public class ControlProfile {
 		try (FileInputStream fis = new FileInputStream(profileFile)) {
 			fis.skip(fileMetaEndPosition);
 			DataInputStream dis = new DataInputStream(fis);
-			InputStreamReader isr = new InputStreamReader(fis, "UTF-16LE");
-			int numOfBindings = dis.readInt();
-			rawBindings = new ControlBinding[numOfBindings];
-			for (int i = 0; i < numOfBindings; i++) {
+			rawBindings = new ControlBinding[dis.readInt()];
+			for (int i = 0; i < rawBindings.length; i++) {
 				rawBindings[i] = ControlBinding.load(dis);
 			}
 		} catch (FileNotFoundException e) {
@@ -121,9 +141,9 @@ public class ControlProfile {
 	 *             If the bindings haven't been loaded
 	 * @see ControlProfile#loadBindings()
 	 */
-	public int getBindingSize() throws BindingsNotLoadedException {
+	public int getBindingSize() {
 		if (!dataLoaded)
-			throw new BindingsNotLoadedException();
+			return -1;
 		if (rawBindings == null)
 			return 0;
 		return rawBindings.length;
@@ -140,30 +160,42 @@ public class ControlProfile {
 	 * Called by ControlsManager to update raw values (Events are between the
 	 * manager and the input)
 	 */
-	public void tick() {
+	public void tickRaw() {
 		for (ControlBinding cb : rawBindings) {
-
+			cb.tickRaw();
 		}
 	}
 
 	/**
-	 * 
+	 * Rebuilds the dependency list and saves both the meta and control bindings
+	 * to the file
 	 */
 	public void save() {
 		try (FileOutputStream fos = new FileOutputStream(profileFile)) {
 			DataOutputStream dos = new DataOutputStream(fos);
 			OutputStreamWriter osr = new OutputStreamWriter(fos);
 			// Write the META
-			dos.writeInt(name.length());
-			osr.write(name);
-			dos.writeInt(dependencies.size());
-			for (String deps : dependencies) {
-				dos.writeInt(deps.length());
-				osr.write(deps);
-			}
-			// Write the DATA
+			dos.writeInt(PROFILE_MAGIC);
+			dos.writeInt(CURRENT_PROFILE_VERSION);
+			inputHolders.clear();
+			outputHolders.clear();
 			for (ControlBinding cb : rawBindings) {
-
+				cb.addInputs(inputHolders);
+				cb.addOutputs(outputHolders);
+			}
+			dos.writeInt(inputHolders.size());
+			for (String ih : inputHolders) {
+				dos.writeInt(ih.length());
+				osr.write(ih);
+			}
+			dos.writeInt(outputHolders.size());
+			for (String oh : outputHolders) {
+				dos.writeInt(oh.length());
+				osr.write(oh);
+			}
+			dos.writeInt(rawBindings.length);
+			for (ControlBinding cb : rawBindings) {
+				ControlBinding.save(cb, dos);
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -171,5 +203,7 @@ public class ControlProfile {
 			e.printStackTrace();
 		}
 	}
+
+	
 
 }

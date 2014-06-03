@@ -1,5 +1,7 @@
 package kino.client.gui;
 
+import kino.client.bindings.ControlGUIOutputs;
+
 
 
 public abstract class Element {
@@ -52,7 +54,7 @@ public abstract class Element {
 	public void onPress(byte index, int x, int y){}
 	public void onMove(byte index, int x, int y){}
 	public void onRelease(byte index, int x, int y){getHolder().getHolder().focusElement(this);}
-	public boolean onControlDown(MenuControls.Action type){return false;}
-	public boolean onControlUp(MenuControls.Action type){return false;}
+	public boolean onControlDown(ControlGUIOutputs.Action type){return false;}
+	public boolean onControlUp(ControlGUIOutputs.Action type){return false;}
 	public void onDisableStateChanged(){}
 }

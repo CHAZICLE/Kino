@@ -6,14 +6,9 @@ import kino.cache.Entity;
 import kino.cache.World;
 import kino.cache.BB.BBRenderDebug;
 import kino.client.WorldRenderer;
-import kino.client.controls.MenuControls.Action;
-import kino.client.controls.GameControls;
-import kino.util.NumericalTools;
 import kino.util.RenderDebug;
 import kino.util.RenderUtils;
-import kino.util.Vector3d;
 
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
@@ -160,8 +155,8 @@ public class GUIGameView extends GUI {
 	public void draw(double interpolation)
 	{
 		/* 3D */
-		if(isExposed())
-			GameControls.doControls(this);
+		//if(isExposed())
+			//GameControls.doControls(this);
 		RenderUtils.setProjection_3D(FOV, (float)getHolder().getWidth()/getHolder().getHeight());
 		RenderUtils.sendProjection_3D();
 		if(controlEntity!=renderEntity || recalculate)

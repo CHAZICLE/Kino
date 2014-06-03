@@ -4,6 +4,6 @@ public interface ControlOutputHolder {
 	public String getName();
 	public int digitalOutputSize();
 	public int analogOutputSize();
-	public DigitalOutput getDigitalOutput();
-	public AnalogOutput getAnalogOutput();
+	public DigitalOutput getDigitalOutput(int i);
+	public AnalogOutput getAnalogOutput(int i);
 }
