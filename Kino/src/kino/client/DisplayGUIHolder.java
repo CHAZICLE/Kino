@@ -179,15 +179,13 @@ public class DisplayGUIHolder extends Thread implements ScreenGUIHolder {
 	private int targetY;
 
 	@Override
-	public void setTarget(int x, int y) {
+	public void setTargetX(int x) {
 		targetX = x;
-		targetY = y;
 	}
 
 	@Override
-	public void deltaTarget(int x, int y) {
-		targetX += x;
-		targetY += y;
+	public void setTargetY(int y) {
+		targetY = y;
 	}
 
 	@Override
