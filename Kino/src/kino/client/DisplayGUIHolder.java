@@ -1,5 +1,6 @@
 package kino.client;
 
+import kino.client.bindings.LWJGLInputScanner;
 import kino.client.bindings.MenuControlGUIOutputs;
 import kino.client.bindings.MenuControlGUIOutputs.Action;
 import kino.client.bindings.ControlsManager;
@@ -35,6 +36,8 @@ public class DisplayGUIHolder extends Thread implements ScreenGUIHolder {
 		RenderUtils.preload();
 		WorldRenderer.preload();
 		ControlsManager.registerOutputHolder(new MenuControlGUIOutputs(this, "Game Menu"));
+		ControlsManager.registerInputScanner(new LWJGLInputScanner());
+		ControlsManager.debugInit();
 		while (!Thread.interrupted() && !Display.isCloseRequested()) {
 			if (firstGUI == null || lastGUI == null)
 				break;

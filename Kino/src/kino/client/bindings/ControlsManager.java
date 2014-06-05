@@ -150,4 +150,11 @@ public class ControlsManager {
 		inactiveProfiles.clear();
 		activeProfiles.clear();
 	}
+
+	public static void debugInit() {
+		//ControlProfile cp = new ControlProfile("Testing Menu Bindings");
+		
+		//cp.addBinding();
+		//inactiveProfiles.add(cp);
+	}
 }
