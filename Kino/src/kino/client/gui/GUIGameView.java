@@ -58,7 +58,6 @@ public class GUIGameView extends GUI {
 		renderWorld.addEntity(smallCube);
 		renderWorld.addEntity(largeCube);
 		
-		
 		controlEntity = renderEntity = kino;
 		
 		cache.start();

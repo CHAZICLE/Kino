@@ -1,6 +1,6 @@
 package kino.client.gui;
 
-import kino.client.bindings.ControlGUIOutputs.Action;
+import kino.client.bindings.MenuControlGUIOutputs.Action;
 
 
 public interface ScreenGUIHolder {
@@ -20,4 +20,8 @@ public interface ScreenGUIHolder {
 	public boolean isSurfaceGUI(GUI gui);
 	
 	public void onAction(Action action, boolean press);
+	public void setTargetX(int x);
+	public void setTargetY(int y);
+	public int getTargetX();
+	public int getTargetY();
 }

@@ -1,6 +1,6 @@
 package kino.client.gui;
 
-import kino.client.bindings.ControlGUIOutputs;
+import kino.client.bindings.MenuControlGUIOutputs;
 
 
 
@@ -51,10 +51,10 @@ public abstract class Element {
 	public void onFocus(int x, int y){}
 	public void onBlur(){}
 	public void onResize(){}
-	public void onPress(byte index, int x, int y){}
-	public void onMove(byte index, int x, int y){}
-	public void onRelease(byte index, int x, int y){getHolder().getHolder().focusElement(this);}
-	public boolean onControlDown(ControlGUIOutputs.Action type){return false;}
-	public boolean onControlUp(ControlGUIOutputs.Action type){return false;}
+	public void onPress(int x, int y){}
+	public void onMove(int x, int y){}
+	public void onRelease(int x, int y){getHolder().getHolder().focusElement(this);}
+	public boolean onControlDown(MenuControlGUIOutputs.Action type){return false;}
+	public boolean onControlUp(MenuControlGUIOutputs.Action type){return false;}
 	public void onDisableStateChanged(){}
 }
