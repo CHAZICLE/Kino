@@ -7,7 +7,7 @@ import kino.client.gui.ScreenGUIHolder;
 
 public class MenuControlGUIOutputs implements COutputHolder {
 	
-	private ScreenGUIHolder holder;
+	private ScreenGUIHolder guiHolder;
 	private String name;
 	public static enum Action {
 		SELECT, BACK, UP, DOWN, LEFT, RIGHT, MENU;
@@ -15,7 +15,7 @@ public class MenuControlGUIOutputs implements COutputHolder {
 	
 
 	public MenuControlGUIOutputs(ScreenGUIHolder holder, String name) {
-		this.holder = holder;
+		this.guiHolder = holder;
 		this.name = name;
 	}
 
@@ -37,11 +37,12 @@ public class MenuControlGUIOutputs implements COutputHolder {
 
 	@Override
 	public DigitalOutput getDigitalOutput(int i) {
-		return new DigitalActionSender(Action.values()[i]);
+		return new DigitalActionSender(this,Action.values()[i]);
 	}
 
 	@Override
 	public AnalogOutput getAnalogOutput(int i) {
+		final MenuControlGUIOutputs holder = this;
 		switch(i)
 		{
 		case 0://TARGET X
@@ -54,7 +55,17 @@ public class MenuControlGUIOutputs implements COutputHolder {
 				
 				@Override
 				public void post(double value) {
-					holder.setTargetX((int)value);
+					guiHolder.setTargetX((int)value);
+				}
+
+				@Override
+				public COutputHolder getOutputHolder() {
+					return holder;
+				}
+
+				@Override
+				public int getID() {
+					return 0;
 				}
 			};
 		case 1://TARGET Y
@@ -67,7 +78,17 @@ public class MenuControlGUIOutputs implements COutputHolder {
 				
 				@Override
 				public void post(double value) {
-					holder.setTargetY((int)value);
+					guiHolder.setTargetY((int)value);
+				}
+
+				@Override
+				public COutputHolder getOutputHolder() {
+					return holder;
+				}
+
+				@Override
+				public int getID() {
+					return 1;
 				}
 			};
 		case 2://TARGET dX
@@ -80,7 +101,17 @@ public class MenuControlGUIOutputs implements COutputHolder {
 				
 				@Override
 				public void post(double value) {
-					holder.setTargetX(holder.getTargetX()+(int)value);
+					guiHolder.setTargetX(guiHolder.getTargetX()+(int)value);
+				}
+
+				@Override
+				public COutputHolder getOutputHolder() {
+					return holder;
+				}
+
+				@Override
+				public int getID() {
+					return 2;
 				}
 			};
 		case 3://TARGET dY
@@ -93,7 +124,17 @@ public class MenuControlGUIOutputs implements COutputHolder {
 				
 				@Override
 				public void post(double value) {
-					holder.setTargetY(holder.getTargetY()+(int)value);
+					guiHolder.setTargetY(guiHolder.getTargetY()+(int)value);
+				}
+
+				@Override
+				public COutputHolder getOutputHolder() {
+					return holder;
+				}
+
+				@Override
+				public int getID() {
+					return 3;
 				}
 			};
 		}
@@ -103,9 +144,11 @@ public class MenuControlGUIOutputs implements COutputHolder {
 	class DigitalActionSender extends DigitalOutput {
 
 		private Action action;
+		private MenuControlGUIOutputs holder;
 		
-		public DigitalActionSender(Action action) {
+		public DigitalActionSender(MenuControlGUIOutputs holder, Action action) {
 			this.action = action;
+			this.holder = holder;
 		}
 
 		@Override
@@ -115,7 +158,17 @@ public class MenuControlGUIOutputs implements COutputHolder {
 
 		@Override
 		public void onStateChange(boolean state) {
-			holder.onAction(action, state);
+			guiHolder.onAction(action, state);
+		}
+
+		@Override
+		public COutputHolder getOutputHolder() {
+			return holder;
+		}
+
+		@Override
+		public int getID() {
+			return 0;
 		}
 	}
 }
