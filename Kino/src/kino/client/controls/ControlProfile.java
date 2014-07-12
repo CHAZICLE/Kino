@@ -15,6 +15,8 @@ import java.util.Set;
 
 import kino.client.controls.io.AnalogInput;
 import kino.client.controls.io.AnalogOutput;
+import kino.client.controls.io.CInputHolder;
+import kino.client.controls.io.COutputHolder;
 import kino.client.controls.io.Input;
 import kino.client.controls.io.Output;
 import kino.client.controls.io.Put;
@@ -135,7 +137,29 @@ public class ControlProfile {
 			for (int i = 0; i < rawBindings.length; i++) {
 				rawBindings[i] = ControlBinding.createBinding(dis);
 				// Read PUTS
-				
+				Put[] puts = new Put[dis.readInt()];
+				for(int j=0;j<puts.length;j++)
+				{
+					int holderID = dis.read();
+					int putID = dis.read();
+					if(holderID<0)//Input
+					{
+						CInputHolder cih = ControlsManager.getInputHolder(((String)inputHolders.toArray()[-holderID+1]));
+						if(putID<0)//Analog
+							puts[j] = cih.getAnalogInput(-putID+1);
+						else//Digital
+							puts[j] = cih.getDigitalInput(putID);
+					}
+					else//Output
+					{
+						COutputHolder coh = ControlsManager.getOutputHolder(((String)outputHolders.toArray()[holderID]));
+						if(putID<0)//Analog
+							puts[j] = coh.getAnalogOutput(-putID+1);
+						else//Digital
+							puts[j] = coh.getDigitalOutput(putID);
+					}
+				}
+				rawBindings[i].setPuts(puts);
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -223,7 +247,6 @@ public class ControlProfile {
 					}
 				}
 			}
-			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
