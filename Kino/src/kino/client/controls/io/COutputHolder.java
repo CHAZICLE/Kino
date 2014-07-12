@@ -1,7 +1,7 @@
 package kino.client.controls.io;
 
 
-public interface COutputHolder extends CPutHolder {
+public interface COutputHolder {
 	public String getName();
 	public int digitalOutputSize();
 	public int analogOutputSize();

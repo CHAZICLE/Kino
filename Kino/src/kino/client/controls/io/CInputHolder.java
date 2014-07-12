@@ -1,7 +1,7 @@
 package kino.client.controls.io;
 
 
-public interface CInputHolder extends CPutHolder {
+public interface CInputHolder {
 	public String getName();
 	public DigitalInput fetchDigitalInput();
 	public AnalogInput fetchAnalogInput();

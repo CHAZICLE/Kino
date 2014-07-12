@@ -8,10 +8,6 @@ import kino.client.controls.mappings.ControlBinding;
 public abstract class Input extends Put {
 	private List<ControlBinding> registeredEventBindings = new LinkedList<ControlBinding>();
 	/**
-	 * @return The input holder that manges this input
-	 */
-	public abstract CInputHolder getHolder();
-	/**
 	 * Called by the profiles to add a control binding to respond to events that
 	 * occur on this input
 	 * 
@@ -43,4 +39,5 @@ public abstract class Input extends Put {
 			//TODO
 		}
 	};
+	public abstract CInputHolder getInputHolder();
 }

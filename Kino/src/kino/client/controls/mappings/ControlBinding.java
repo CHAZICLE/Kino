@@ -21,10 +21,6 @@ public abstract class ControlBinding {
 		if(binding instanceof BasicDigitalControlBinding)
 			dos.writeByte(0);
 		binding.write(dos);
-		for(Put put : binding.getPuts())
-		{
-			
-		}
 	}
 	public void write(DataOutputStream dos) throws IOException{}
 	public abstract Put[] getPuts();

@@ -51,6 +51,7 @@ public class LWJGLInputScanner implements CInputScanner {
 
 		@Override
 		public DigitalInput getDigitalInput(final int i) {
+			final MouseInputHolder holder = this;
 			return new DigitalInput() {
 				
 				@Override
@@ -72,11 +73,17 @@ public class LWJGLInputScanner implements CInputScanner {
 				public int getID() {
 					return i;
 				}
+
+				@Override
+				public CInputHolder getInputHolder() {
+					return holder;
+				}
 			};
 		}
 
 		@Override
 		public AnalogInput getAnalogInput(final int i) {
+			final MouseInputHolder holder = this;
 			return new AnalogInput() {
 				
 				@Override
@@ -117,7 +124,12 @@ public class LWJGLInputScanner implements CInputScanner {
 				
 				@Override
 				public int getID() {
-					return -i-1;
+					return i;
+				}
+
+				@Override
+				public CInputHolder getInputHolder() {
+					return holder;
 				}
 			};
 		}

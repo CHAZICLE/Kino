@@ -10,7 +10,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
+import kino.client.controls.io.AnalogInput;
+import kino.client.controls.io.AnalogOutput;
+import kino.client.controls.io.Input;
+import kino.client.controls.io.Output;
+import kino.client.controls.io.Put;
 import kino.client.controls.mappings.ControlBinding;
 
 public class ControlProfile {
@@ -69,7 +76,7 @@ public class ControlProfile {
 			fileMetaEndPosition += 12 + name.length() * 2;
 			// Read the input dependencies
 			int depSize = dis.read();
-			inputHolders = new HashSet<String>();
+			inputHolders = new LinkedHashSet<String>();
 			fileMetaEndPosition = 0;
 			for (int i = 0; i < depSize; i++) {
 				cbuf = new char[dis.readInt()];
@@ -79,7 +86,7 @@ public class ControlProfile {
 			}
 			// Read the output dependencies
 			depSize = dis.read();
-			outputHolders = new HashSet<String>();
+			outputHolders = new LinkedHashSet<String>();
 			fileMetaEndPosition = 0;
 			for (int i = 0; i < depSize; i++) {
 				cbuf = new char[dis.readInt()];
@@ -179,12 +186,6 @@ public class ControlProfile {
 			// Write the META
 			dos.writeInt(PROFILE_MAGIC);
 			dos.writeInt(CURRENT_PROFILE_VERSION);
-			inputHolders.clear();
-			outputHolders.clear();
-			for (ControlBinding cb : rawBindings) {
-				cb.addInputsToSet(inputHolders);
-				cb.addOutputsToSet(outputHolders);
-			}
 			dos.writeInt(inputHolders.size());
 			for (String ih : inputHolders) {
 				dos.writeInt(ih.length());
@@ -197,15 +198,45 @@ public class ControlProfile {
 			}
 			dos.writeInt(rawBindings.length);
 			for (ControlBinding cb : rawBindings) {
-				ControlBinding.save(cb, dos);
+				ControlBinding.writeBinding(dos, cb);
+				for(Put put : cb.getPuts())
+				{
+					if(put instanceof Input)
+					{
+						dos.writeByte(-getIndexOf(inputHolders, ((Input)put).getInputHolder().getName())-1);
+						if(put instanceof AnalogInput)
+							dos.writeByte(-put.getID()-1);
+						else
+							dos.writeByte(put.getID());
+					}
+					else if(put instanceof Output)
+					{
+						dos.writeByte(getIndexOf(outputHolders, ((Output)put).getOutputHolder().getName()));
+						if(put instanceof AnalogOutput)
+							dos.writeByte(-put.getID()-1);
+						else
+							dos.writeByte(put.getID());
+					}
+				}
 			}
+			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-
+	private int getIndexOf(Set<String> someSet, String oj)
+	{
+		int c=0;
+		for(Object ok : someSet)
+		{
+			if(ok.equals(oj))
+				return c;
+			c++;
+		}
+		return -1;
+	}
 	
 
 }
