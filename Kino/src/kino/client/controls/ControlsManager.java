@@ -157,7 +157,6 @@ public class ControlsManager {
 				inactiveProfiles.add(new ControlProfile(f));
 			}
 		}
-		
 	}
 
 	public static void checkProfiles() {
@@ -169,6 +168,7 @@ public class ControlsManager {
 			{
 				inactiveProfiles.remove(cp);
 				activeProfiles.add(cp);
+				cp.loadBindings();
 				continue;
 			}
 		}
@@ -207,8 +207,9 @@ public class ControlsManager {
 		
 		
 		cp.addBinding(new BasicDigitalControlBinding(false, mouseLeftButton, someAction));
-		inactiveProfiles.add(cp);
+		//inactiveProfiles.add(cp);
 		
-		checkProfiles();
+		//checkProfiles();
+		cp.save();
 	}
 }

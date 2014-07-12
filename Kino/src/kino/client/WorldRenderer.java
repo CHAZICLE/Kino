@@ -56,7 +56,7 @@ public class WorldRenderer {
 	
 	public static void preload() {
 		terrainModel.preload();
-		textureTest.preload();
+		//textureTest.preload();
 	}
 	public static void unload() {
 		

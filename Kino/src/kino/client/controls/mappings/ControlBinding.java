@@ -7,12 +7,15 @@ import java.io.IOException;
 import kino.client.controls.io.Put;
 
 public abstract class ControlBinding {
+	
 	public static ControlBinding createBinding(DataInputStream dis) throws IOException
 	{
 		switch(dis.readByte())
 		{
 		case 0:
 			return new BasicDigitalControlBinding(dis);
+		case 1:
+			return new BasicAnalogControlBinding(dis);
 		}
 		return null;
 	}
@@ -20,6 +23,8 @@ public abstract class ControlBinding {
 	{
 		if(binding instanceof BasicDigitalControlBinding)
 			dos.writeByte(0);
+		if(binding instanceof BasicAnalogControlBinding)
+			dos.writeByte(1);
 		binding.write(dos);
 	}
 	public void write(DataOutputStream dos) throws IOException{}

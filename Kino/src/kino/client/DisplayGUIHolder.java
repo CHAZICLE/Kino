@@ -35,9 +35,16 @@ public class DisplayGUIHolder extends Thread implements ScreenGUIHolder {
 
 		RenderUtils.preload();
 		WorldRenderer.preload();
+		
 		ControlsManager.registerOutputHolder(new MenuControlGUIOutputs(this, "Game Menu"));
 		ControlsManager.registerInputScanner(new LWJGLInputScanner());
+		
+		
 		ControlsManager.debugInit();
+		
+		ControlsManager.loadProfiles();
+		
+		
 		while (!Thread.interrupted() && !Display.isCloseRequested()) {
 			if (firstGUI == null || lastGUI == null)
 				break;

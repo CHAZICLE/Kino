@@ -7,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -45,6 +44,7 @@ public class ControlProfile {
 
 	public ControlProfile(File profileFile) {
 		this.profileFile = profileFile;
+		name = "("+profileFile.getName()+")";
 		loadMeta();
 	}
 
@@ -53,8 +53,17 @@ public class ControlProfile {
 		rawBindings = new ControlBinding[0];
 		inputHolders = new HashSet<String>();
 		outputHolders = new HashSet<String>();
+		profileFile = new File("./res/profiles/"+name+".knp");
+		metaLoaded = true;
+		dataLoaded = true;
 	}
-
+	private String readString(DataInputStream dis, int len) throws IOException
+	{
+		byte[] data = new byte[len*2];
+		dis.readFully(data);
+		String s = new String(data,"UTF-16LE");
+		return s;
+	}
 	/**
 	 * Loads the meta from the file
 	 */
@@ -63,47 +72,46 @@ public class ControlProfile {
 			return;
 		metaLoaded = true;
 		try (FileInputStream fis = new FileInputStream(profileFile)) {
-			@SuppressWarnings("resource")
 			DataInputStream dis = new DataInputStream(fis);
 			if (PROFILE_MAGIC != dis.readInt()) {
 				// Unknown file type - Abandon Ship.
+				dis.close();
 				throw new IllegalArgumentException("Unknown profile filetype!");
 			}
 			if (CURRENT_PROFILE_VERSION != dis.readInt()) {
 				// Unknown version - Abandon Ship.
+				dis.close();
 				throw new IllegalArgumentException("Unknown version! (TODO: Legacy version loader code)");
 			}
-			@SuppressWarnings("resource")
-			InputStreamReader isr = new InputStreamReader(fis, "UTF-16LE");
+			
 			// Read the name
-			char[] cbuf = new char[dis.readInt()];
-			isr.read(cbuf);
-			name = new String(cbuf);
-			fileMetaEndPosition += 12 + name.length() * 2;
+			name = readString(dis, dis.readInt());
+			
+			fileMetaEndPosition = 4+4+4 + name.length() * 2;
 			// Read the input dependencies
-			int depSize = dis.read();
+			int depSize = dis.readInt();
+			int len;
 			inputHolders = new LinkedHashSet<String>();
-			fileMetaEndPosition = 0;
+			fileMetaEndPosition += 4;
 			for (int i = 0; i < depSize; i++) {
-				cbuf = new char[dis.readInt()];
-				inputHolders.add(new String(cbuf));
-				isr.read(cbuf);
-				fileMetaEndPosition += 4 + cbuf.length * 2;
+				len = dis.readInt();
+				inputHolders.add(readString(dis, len));
+				fileMetaEndPosition += 4 + len * 2;
+
 			}
 			// Read the output dependencies
-			depSize = dis.read();
+			depSize = dis.readInt();
 			outputHolders = new LinkedHashSet<String>();
-			fileMetaEndPosition = 0;
+			fileMetaEndPosition += 4;
 			for (int i = 0; i < depSize; i++) {
-				cbuf = new char[dis.readInt()];
-				outputHolders.add(new String(cbuf));
-				isr.read(cbuf);
-				fileMetaEndPosition += 4 + cbuf.length * 2;
+				len = dis.readInt();
+				outputHolders.add(readString(dis, len));
+				fileMetaEndPosition += 4 + len * 2;
 			}
 		} catch (FileNotFoundException e) {
 			/* Shouldn't happen */
 		} catch (IOException e) {
-
+			e.printStackTrace();
 		}
 	}
 
@@ -135,7 +143,11 @@ public class ControlProfile {
 		if (dataLoaded)
 			return;
 		try (FileInputStream fis = new FileInputStream(profileFile)) {
-			fis.skip(fileMetaEndPosition);
+			long temp = fileMetaEndPosition;
+			while(temp>0)
+				temp -= fis.skip(temp);
+			
+			
 			DataInputStream dis = new DataInputStream(fis);
 			rawBindings = new ControlBinding[dis.readInt()];
 			for (int i = 0; i < rawBindings.length; i++) {
@@ -148,9 +160,9 @@ public class ControlProfile {
 					int putID = dis.readInt();
 					if(holderID<0)//Input
 					{
-						CInputHolder cih = ControlsManager.getInputHolder(((String)inputHolders.toArray()[-holderID+1]));
+						CInputHolder cih = ControlsManager.getInputHolder(((String)inputHolders.toArray()[-holderID-1]));
 						if(putID<0)//Analog
-							puts[j] = cih.getAnalogInput(-putID+1);
+							puts[j] = cih.getAnalogInput(-putID-1);
 						else//Digital
 							puts[j] = cih.getDigitalInput(putID);
 					}
@@ -158,7 +170,7 @@ public class ControlProfile {
 					{
 						COutputHolder coh = ControlsManager.getOutputHolder(((String)outputHolders.toArray()[holderID]));
 						if(putID<0)//Analog
-							puts[j] = coh.getAnalogOutput(-putID+1);
+							puts[j] = coh.getAnalogOutput(-putID-1);
 						else//Digital
 							puts[j] = coh.getDigitalOutput(putID);
 					}
@@ -212,19 +224,28 @@ public class ControlProfile {
 	public void save() {
 		try (FileOutputStream fos = new FileOutputStream(profileFile)) {
 			DataOutputStream dos = new DataOutputStream(fos);
-			OutputStreamWriter osr = new OutputStreamWriter(fos);
+			OutputStreamWriter osr = new OutputStreamWriter(fos, "UTF-16LE");
 			// Write the META
 			dos.writeInt(PROFILE_MAGIC);
 			dos.writeInt(CURRENT_PROFILE_VERSION);
+			dos.flush();
+			// Write name
+			dos.writeInt(name.length());
+			osr.write(name);
+			osr.flush();
 			dos.writeInt(inputHolders.size());
 			for (String ih : inputHolders) {
 				dos.writeInt(ih.length());
+				dos.flush();
 				osr.write(ih);
+				osr.flush();
 			}
 			dos.writeInt(outputHolders.size());
 			for (String oh : outputHolders) {
 				dos.writeInt(oh.length());
+				dos.flush();
 				osr.write(oh);
+				osr.flush();
 			}
 			dos.writeInt(rawBindings.length);
 			for (ControlBinding cb : rawBindings) {
@@ -251,6 +272,8 @@ public class ControlProfile {
 					}
 				}
 			}
+			dos.flush();
+			fos.flush();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
