@@ -140,8 +140,8 @@ public class ControlProfile {
 				Put[] puts = new Put[dis.readInt()];
 				for(int j=0;j<puts.length;j++)
 				{
-					int holderID = dis.read();
-					int putID = dis.read();
+					int holderID = dis.readByte();
+					int putID = dis.readInt();
 					if(holderID<0)//Input
 					{
 						CInputHolder cih = ControlsManager.getInputHolder(((String)inputHolders.toArray()[-holderID+1]));
@@ -233,17 +233,17 @@ public class ControlProfile {
 					{
 						dos.writeByte(-getIndexOf(inputHolders, ((Input)put).getInputHolder().getName())-1);
 						if(put instanceof AnalogInput)
-							dos.writeByte(-put.getID()-1);
+							dos.writeInt(-put.getID()-1);
 						else
-							dos.writeByte(put.getID());
+							dos.writeInt(put.getID());
 					}
 					else if(put instanceof Output)
 					{
 						dos.writeByte(getIndexOf(outputHolders, ((Output)put).getOutputHolder().getName()));
 						if(put instanceof AnalogOutput)
-							dos.writeByte(-put.getID()-1);
+							dos.writeInt(-put.getID()-1);
 						else
-							dos.writeByte(put.getID());
+							dos.writeInt(put.getID());
 					}
 				}
 			}
