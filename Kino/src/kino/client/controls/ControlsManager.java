@@ -204,12 +204,12 @@ public class ControlsManager {
 		System.out.println("CInputHolder="+cih.getName());
 		System.out.println("COutputHolder="+coh.getName());
 		
-		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, 1, cih.getDigitalInput(Keyboard.KEY_W), coh.getAnalogOutput(0)));
-		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, -1, cih.getDigitalInput(Keyboard.KEY_S), coh.getAnalogOutput(0)));
-		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, 1, cih.getDigitalInput(Keyboard.KEY_D), coh.getAnalogOutput(1)));
-		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, -1, cih.getDigitalInput(Keyboard.KEY_A), coh.getAnalogOutput(1)));
-		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, 1, cih.getDigitalInput(Keyboard.KEY_Q), coh.getAnalogOutput(2)));
-		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, -1, cih.getDigitalInput(Keyboard.KEY_E), coh.getAnalogOutput(2)));
+		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, 1, cih.getDigitalInput(Keyboard.KEY_A), coh.getAnalogOutput(0)));
+		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, -1, cih.getDigitalInput(Keyboard.KEY_D), coh.getAnalogOutput(0)));
+		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, 1, cih.getDigitalInput(Keyboard.KEY_W), coh.getAnalogOutput(1)));
+		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, -1, cih.getDigitalInput(Keyboard.KEY_S), coh.getAnalogOutput(1)));
+		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, 1, cih.getDigitalInput(Keyboard.KEY_E), coh.getAnalogOutput(2)));
+		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, -1, cih.getDigitalInput(Keyboard.KEY_Q), coh.getAnalogOutput(2)));
 		inactiveProfiles.add(cp);
 		
 		//checkProfiles();

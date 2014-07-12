@@ -72,10 +72,13 @@ public class KinoControls implements COutputHolder {
 				{
 				case 0://North
 					kino.position.add(value,0,0);
+					break;
 				case 1://East
 					kino.position.add(0,0,value);
+					break;
 				case 2://Sky
 					kino.position.add(0,value,0);
+					break;
 				}
 				gv.doRecalculate();
 			}
