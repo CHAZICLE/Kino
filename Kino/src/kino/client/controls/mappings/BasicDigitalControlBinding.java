@@ -9,6 +9,19 @@ import kino.client.controls.io.DigitalOutput;
 import kino.client.controls.io.Put;
 
 public class BasicDigitalControlBinding extends ControlBinding {
+	public BasicDigitalControlBinding() {
+		this(false);
+	}
+	public BasicDigitalControlBinding(boolean inverted)
+	{
+		this.inverted = inverted;
+	}
+	public BasicDigitalControlBinding(boolean inverted, DigitalInput input, DigitalOutput output)
+	{
+		this(inverted);
+		this.input = input;
+		this.output = output;
+	}
 	public BasicDigitalControlBinding(DataInputStream dis) throws IOException {
 		inverted = dis.readBoolean();
 	}

@@ -172,6 +172,7 @@ public class DisplayGUIHolder extends Thread implements ScreenGUIHolder {
 
 	@Override
 	public void onAction(Action action, boolean down) {
+		System.out.println("Root GUI Holder received: "+action.name());
 		if (down)
 			lastGUI.onControlDown(action);
 		else

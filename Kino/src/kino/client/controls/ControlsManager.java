@@ -11,6 +11,9 @@ import java.util.Map;
 import kino.client.controls.io.CInputHolder;
 import kino.client.controls.io.CInputScanner;
 import kino.client.controls.io.COutputHolder;
+import kino.client.controls.io.DigitalInput;
+import kino.client.controls.io.DigitalOutput;
+import kino.client.controls.mappings.BasicDigitalControlBinding;
 
 public class ControlsManager {
 	private static List<CInputScanner> scanners = new ArrayList<>();
@@ -117,7 +120,7 @@ public class ControlsManager {
 	private static int tick;
 
 	public static void doControls() {
-		if(tick%20==0)
+		if(tick%100==0)
 		{
 			System.out.println("-= Controls Debug "+tick+" =-");
 			System.out.println("#activeProfiles="+activeProfiles.size());
@@ -126,9 +129,10 @@ public class ControlsManager {
 			System.out.println("#inputHolders"+inputHolders.size());
 			System.out.println("#outputHolders"+outputHolders.size());
 		}
-		if (tick % 10 == 0) {
+		if (tick % 100 == 0) {
 			verifyInputHolders();
 			scanForNewInputHolders();
+			checkProfiles();
 		}
 		for (ControlProfile cp : activeProfiles) {
 			cp.tickRaw();
@@ -157,7 +161,27 @@ public class ControlsManager {
 	}
 
 	public static void checkProfiles() {
-
+		//TODO: Spread this out over control ticks a bit
+		for(int i=0;i<inactiveProfiles.size();i++)
+		{
+			ControlProfile cp = inactiveProfiles.get(i);
+			if(cp.checkDependencies())
+			{
+				inactiveProfiles.remove(cp);
+				activeProfiles.add(cp);
+				continue;
+			}
+		}
+		for(int i=0;i<activeProfiles.size();i++)
+		{
+			ControlProfile cp = activeProfiles.get(i);
+			if(!cp.checkDependencies())
+			{
+				activeProfiles.remove(cp);
+				inactiveProfiles.add(cp);
+				continue;
+			}
+		}
 	}
 
 	public static void clearProfiles() {
@@ -166,9 +190,25 @@ public class ControlsManager {
 	}
 
 	public static void debugInit() {
-		//ControlProfile cp = new ControlProfile("Testing Menu Bindings");
+		scanForNewInputHolders();
 		
-		//cp.addBinding();
-		//inactiveProfiles.add(cp);
+		ControlProfile cp = new ControlProfile("Testing Menu Bindings");
+		CInputHolder cih = ControlsManager.getInputHolder("Mouse");
+		COutputHolder coh = ControlsManager.getOutputHolder("Game Menu");
+		
+		System.out.println("CInputHolder="+cih.getName());
+		System.out.println("COutputHolder="+coh.getName());
+		
+		DigitalInput mouseLeftButton = cih.getDigitalInput(0);
+		DigitalOutput someAction = coh.getDigitalOutput(0);
+		
+		System.out.println("mouseLeftButton="+mouseLeftButton.getName());
+		System.out.println("someAction="+someAction.getName());
+		
+		
+		cp.addBinding(new BasicDigitalControlBinding(false, mouseLeftButton, someAction));
+		inactiveProfiles.add(cp);
+		
+		checkProfiles();
 	}
 }

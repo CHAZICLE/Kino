@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -49,6 +50,9 @@ public class ControlProfile {
 
 	public ControlProfile(String name) {
 		this.name = name;
+		rawBindings = new ControlBinding[0];
+		inputHolders = new HashSet<String>();
+		outputHolders = new HashSet<String>();
 	}
 
 	/**
@@ -265,5 +269,16 @@ public class ControlProfile {
 		return -1;
 	}
 	
-
+	public void addBinding(ControlBinding binding)
+	{
+		rawBindings = Arrays.copyOf(rawBindings, rawBindings.length+1);
+		rawBindings[rawBindings.length-1] = binding;
+		for(Put put : binding.getPuts())
+		{
+			if(put instanceof Input)
+				inputHolders.add(((Input)put).getInputHolder().getName());
+			if(put instanceof Output)
+				outputHolders.add(((Output)put).getOutputHolder().getName());
+		}
+	}
 }
