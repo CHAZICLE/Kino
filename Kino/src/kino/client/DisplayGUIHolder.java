@@ -36,13 +36,10 @@ public class DisplayGUIHolder extends Thread implements ScreenGUIHolder {
 		RenderUtils.preload();
 		WorldRenderer.preload();
 		
+		ControlsManager.loadProfiles();
+		
 		ControlsManager.registerOutputHolder(new MenuControlGUIOutputs(this, "Game Menu"));
 		ControlsManager.registerInputScanner(new LWJGLInputScanner());
-		
-		
-		ControlsManager.debugInit();
-		
-		ControlsManager.loadProfiles();
 		
 		
 		while (!Thread.interrupted() && !Display.isCloseRequested()) {
@@ -179,7 +176,6 @@ public class DisplayGUIHolder extends Thread implements ScreenGUIHolder {
 
 	@Override
 	public void onAction(Action action, boolean down) {
-		System.out.println("Root GUI Holder received: "+action.name());
 		if (down)
 			lastGUI.onControlDown(action);
 		else

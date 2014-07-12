@@ -11,9 +11,9 @@ import java.util.Map;
 import kino.client.controls.io.CInputHolder;
 import kino.client.controls.io.CInputScanner;
 import kino.client.controls.io.COutputHolder;
-import kino.client.controls.io.DigitalInput;
-import kino.client.controls.io.DigitalOutput;
-import kino.client.controls.mappings.BasicDigitalControlBinding;
+import kino.client.controls.mappings.DigitalIncrementalAnalogControlBinding;
+
+import org.lwjgl.input.Keyboard;
 
 public class ControlsManager {
 	private static List<CInputScanner> scanners = new ArrayList<>();
@@ -36,8 +36,9 @@ public class ControlsManager {
 		synchronized (scanners) {
 			Iterator<CInputScanner> it = scanners.iterator();
 			while (it.hasNext()) {
-				CInputHolder controlInputHolder = it.next().scan();
-				if (controlInputHolder != null) {
+				CInputScanner scanner = it.next();
+				CInputHolder controlInputHolder = scanner.scan();
+				while (controlInputHolder != null) {
 					synchronized (inputHolders) {
 						inputHolders.put(controlInputHolder.getName(), controlInputHolder);
 					}
@@ -47,9 +48,11 @@ public class ControlsManager {
 						if (cp.hasInputDependency(controlInputHolder.getName()) && cp.checkDependencies()) {
 							cp.setActive(true);
 							api.remove();
+							cp.loadBindings();
 							activeProfiles.add(cp);
 						}
 					}
+					controlInputHolder = scanner.scan();
 				}
 			}
 		}
@@ -82,16 +85,17 @@ public class ControlsManager {
 	public static void registerOutputHolder(COutputHolder controlOutputHolder) {
 		synchronized (outputHolders) {
 			outputHolders.put(controlOutputHolder.getName(), controlOutputHolder);
-		}
+		}/*
 		Iterator<ControlProfile> api = inactiveProfiles.iterator();
 		while (api.hasNext()) {
 			ControlProfile cp = api.next();
 			if (cp.hasOutputDependency(controlOutputHolder.getName()) && cp.checkDependencies()) {
 				cp.setActive(true);
 				api.remove();
+				cp.loadBindings();
 				activeProfiles.add(cp);
 			}
-		}
+		}*/
 	}
 
 	public static void unregisterOutputHolder(COutputHolder controlOutputHolder) {
@@ -120,6 +124,12 @@ public class ControlsManager {
 	private static int tick;
 
 	public static void doControls() {
+		
+		if (tick % 100 == 0) {
+			verifyInputHolders();
+			scanForNewInputHolders();
+			checkProfiles();
+		}
 		if(tick%100==0)
 		{
 			System.out.println("-= Controls Debug "+tick+" =-");
@@ -129,13 +139,8 @@ public class ControlsManager {
 			System.out.println("#inputHolders"+inputHolders.size());
 			System.out.println("#outputHolders"+outputHolders.size());
 		}
-		if (tick % 100 == 0) {
-			verifyInputHolders();
-			scanForNewInputHolders();
-			checkProfiles();
-		}
-		for (ControlProfile cp : activeProfiles) {
-			cp.tickRaw();
+		for (int i=0;i<activeProfiles.size();i++) {
+			activeProfiles.get(i).tickRaw();
 		}
 		// TODO: Events
 		/*
@@ -166,9 +171,9 @@ public class ControlsManager {
 			ControlProfile cp = inactiveProfiles.get(i);
 			if(cp.checkDependencies())
 			{
+				cp.loadBindings();
 				inactiveProfiles.remove(cp);
 				activeProfiles.add(cp);
-				cp.loadBindings();
 				continue;
 			}
 		}
@@ -192,24 +197,22 @@ public class ControlsManager {
 	public static void debugInit() {
 		scanForNewInputHolders();
 		
-		ControlProfile cp = new ControlProfile("Testing Menu Bindings");
-		CInputHolder cih = ControlsManager.getInputHolder("Mouse");
-		COutputHolder coh = ControlsManager.getOutputHolder("Game Menu");
+		ControlProfile cp = new ControlProfile("Testing Kino Bindings");
+		CInputHolder cih = ControlsManager.getInputHolder("Keyboard");
+		COutputHolder coh = ControlsManager.getOutputHolder("Kino 1");
 		
 		System.out.println("CInputHolder="+cih.getName());
 		System.out.println("COutputHolder="+coh.getName());
 		
-		DigitalInput mouseLeftButton = cih.getDigitalInput(0);
-		DigitalOutput someAction = coh.getDigitalOutput(0);
-		
-		System.out.println("mouseLeftButton="+mouseLeftButton.getName());
-		System.out.println("someAction="+someAction.getName());
-		
-		
-		cp.addBinding(new BasicDigitalControlBinding(false, mouseLeftButton, someAction));
-		//inactiveProfiles.add(cp);
+		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, 1, cih.getDigitalInput(Keyboard.KEY_W), coh.getAnalogOutput(0)));
+		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, -1, cih.getDigitalInput(Keyboard.KEY_S), coh.getAnalogOutput(0)));
+		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, 1, cih.getDigitalInput(Keyboard.KEY_D), coh.getAnalogOutput(1)));
+		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, -1, cih.getDigitalInput(Keyboard.KEY_A), coh.getAnalogOutput(1)));
+		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, 1, cih.getDigitalInput(Keyboard.KEY_Q), coh.getAnalogOutput(2)));
+		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, -1, cih.getDigitalInput(Keyboard.KEY_E), coh.getAnalogOutput(2)));
+		inactiveProfiles.add(cp);
 		
 		//checkProfiles();
-		cp.save();
+		//cp.save();
 	}
 }

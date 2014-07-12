@@ -5,7 +5,9 @@ import kino.cache.EKino;
 import kino.cache.Entity;
 import kino.cache.World;
 import kino.cache.BB.BBRenderDebug;
+import kino.client.KinoControls;
 import kino.client.WorldRenderer;
+import kino.client.controls.ControlsManager;
 import kino.util.RenderDebug;
 import kino.util.RenderUtils;
 
@@ -20,6 +22,10 @@ public class GUIGameView extends GUI {
 		cache.addWorld(renderWorld=new World());
 		
 		kino=new EKino();
+		ControlsManager.registerOutputHolder(new KinoControls((EKino)kino, this, 1));
+		
+		ControlsManager.debugInit();
+		
 		kino2=new EKino();
 		kino2.render = true;
 		

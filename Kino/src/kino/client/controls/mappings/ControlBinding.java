@@ -16,7 +16,10 @@ public abstract class ControlBinding {
 			return new BasicDigitalControlBinding(dis);
 		case 1:
 			return new BasicAnalogControlBinding(dis);
+		case 2:
+			return new DigitalIncrementalAnalogControlBinding(dis);
 		}
+		System.out.println("NO SUCH BINDING");
 		return null;
 	}
 	public static void writeBinding(DataOutputStream dos, ControlBinding binding) throws IOException
@@ -25,6 +28,8 @@ public abstract class ControlBinding {
 			dos.writeByte(0);
 		if(binding instanceof BasicAnalogControlBinding)
 			dos.writeByte(1);
+		if(binding instanceof DigitalIncrementalAnalogControlBinding)
+			dos.writeByte(2);
 		binding.write(dos);
 	}
 	public void write(DataOutputStream dos) throws IOException{}

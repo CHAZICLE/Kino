@@ -142,6 +142,8 @@ public class ControlProfile {
 	public void loadBindings() {
 		if (dataLoaded)
 			return;
+		System.out.println("LOADING BINDINGS");
+		dataLoaded = true;
 		try (FileInputStream fis = new FileInputStream(profileFile)) {
 			long temp = fileMetaEndPosition;
 			while(temp>0)
