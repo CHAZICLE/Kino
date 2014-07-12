@@ -3,7 +3,7 @@ package kino.client.gui;
 import java.util.ArrayList;
 import java.util.List;
 
-import kino.client.bindings.MenuControlGUIOutputs;
+import kino.client.controls.MenuControlGUIOutputs;
 
 public abstract class GUI {
 	private ScreenGUIHolder holder;

@@ -1,8 +1,11 @@
-package kino.client.bindings;
+package kino.client.controls;
 
+import kino.client.controls.io.AnalogOutput;
+import kino.client.controls.io.COutputHolder;
+import kino.client.controls.io.DigitalOutput;
 import kino.client.gui.ScreenGUIHolder;
 
-public class MenuControlGUIOutputs implements ControlOutputHolder {
+public class MenuControlGUIOutputs implements COutputHolder {
 	
 	private ScreenGUIHolder holder;
 	private String name;

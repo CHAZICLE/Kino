@@ -1,4 +1,5 @@
-package kino.client.bindings;
+package kino.client.controls.io;
+
 
 public abstract class DigitalOutput extends Output {
 	private boolean previousState = false;

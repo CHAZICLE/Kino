@@ -1,4 +1,4 @@
-package kino.client.bindings;
+package kino.client.controls;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.HashSet;
+
+import kino.client.controls.mappings.ControlBinding;
 
 public class ControlProfile {
 
@@ -124,7 +126,7 @@ public class ControlProfile {
 			DataInputStream dis = new DataInputStream(fis);
 			rawBindings = new ControlBinding[dis.readInt()];
 			for (int i = 0; i < rawBindings.length; i++) {
-				rawBindings[i] = ControlBinding.load(dis);
+				rawBindings[i] = ControlBinding.createBinding(dis);
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -180,8 +182,8 @@ public class ControlProfile {
 			inputHolders.clear();
 			outputHolders.clear();
 			for (ControlBinding cb : rawBindings) {
-				cb.addInputs(inputHolders);
-				cb.addOutputs(outputHolders);
+				cb.addInputsToSet(inputHolders);
+				cb.addOutputsToSet(outputHolders);
 			}
 			dos.writeInt(inputHolders.size());
 			for (String ih : inputHolders) {

@@ -1,9 +1,9 @@
 package kino.client;
 
-import kino.client.bindings.LWJGLInputScanner;
-import kino.client.bindings.MenuControlGUIOutputs;
-import kino.client.bindings.MenuControlGUIOutputs.Action;
-import kino.client.bindings.ControlsManager;
+import kino.client.controls.ControlsManager;
+import kino.client.controls.LWJGLInputScanner;
+import kino.client.controls.MenuControlGUIOutputs;
+import kino.client.controls.MenuControlGUIOutputs.Action;
 import kino.client.gui.Element;
 import kino.client.gui.GUI;
 import kino.client.gui.GUIMainMenu;
@@ -42,7 +42,7 @@ public class DisplayGUIHolder extends Thread implements ScreenGUIHolder {
 			if (firstGUI == null || lastGUI == null)
 				break;
 			// Controls
-			ControlsManager.doControlLoop();
+			ControlsManager.doControls();
 
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			double interpolation = getDelta();

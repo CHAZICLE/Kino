@@ -1,4 +1,5 @@
-package kino.client.bindings;
+package kino.client.controls.io;
+
 
 /**
  * A class to represent a stated input

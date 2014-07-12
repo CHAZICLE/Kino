@@ -1,4 +1,4 @@
-package kino.client.bindings;
+package kino.client.controls.mappings;
 
 public class BasicAnalogControlBinding {
 

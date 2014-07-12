@@ -1,6 +1,6 @@
 package kino.client.gui;
 
-import kino.client.bindings.MenuControlGUIOutputs;
+import kino.client.controls.MenuControlGUIOutputs;
 
 
 

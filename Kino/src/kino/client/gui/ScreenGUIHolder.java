@@ -1,6 +1,6 @@
 package kino.client.gui;
 
-import kino.client.bindings.MenuControlGUIOutputs.Action;
+import kino.client.controls.MenuControlGUIOutputs.Action;
 
 
 public interface ScreenGUIHolder {
