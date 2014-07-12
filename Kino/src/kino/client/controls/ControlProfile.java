@@ -134,6 +134,8 @@ public class ControlProfile {
 			rawBindings = new ControlBinding[dis.readInt()];
 			for (int i = 0; i < rawBindings.length; i++) {
 				rawBindings[i] = ControlBinding.createBinding(dis);
+				// Read PUTS
+				
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -199,7 +201,9 @@ public class ControlProfile {
 			dos.writeInt(rawBindings.length);
 			for (ControlBinding cb : rawBindings) {
 				ControlBinding.writeBinding(dos, cb);
-				for(Put put : cb.getPuts())
+				Put[] puts = cb.getPuts();
+				dos.writeInt(puts.length);
+				for(Put put : puts)
 				{
 					if(put instanceof Input)
 					{
