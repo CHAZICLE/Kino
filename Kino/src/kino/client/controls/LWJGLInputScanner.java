@@ -98,6 +98,12 @@ public class LWJGLInputScanner implements CInputScanner {
 						return "Mouse X";
 					case 1:
 						return "Mouse Y";
+					case 2:
+						return "Mouse Delta X";
+					case 3:
+						return "Mouse Delta Y";
+					case 4:
+						return "Mouse Delta Wheel";
 					}
 					return null;
 				}
@@ -110,6 +116,12 @@ public class LWJGLInputScanner implements CInputScanner {
 						return Mouse.getEventX();
 					case 1:
 						return Mouse.getEventY();
+					case 2:
+						return Mouse.getEventDX();
+					case 3:
+						return Mouse.getEventDY();
+					case 4:
+						return Mouse.getEventDWheel();
 					}
 					return 0;
 				}
@@ -122,6 +134,12 @@ public class LWJGLInputScanner implements CInputScanner {
 						return Mouse.getX();
 					case 1:
 						return Mouse.getY();
+					case 2:
+						return Mouse.getDX();
+					case 3:
+						return Mouse.getDY();
+					case 4:
+						return Mouse.getDWheel();
 					}
 					return 0;
 				}

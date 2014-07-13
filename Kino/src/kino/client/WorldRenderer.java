@@ -38,8 +38,8 @@ public class WorldRenderer {
 			{
 				GL11.glPushMatrix();
 				GL11.glTranslated(ent.position.getX(), ent.position.getY(), ent.position.getZ());
-				GL11.glRotated(270+ent.horzRot, 0.0f,1.0f,0.0f);
-				GL11.glRotated(ent.vertRot, 0.0f,0.0f,1.0f);
+				GL11.glRotated(270+ent.yaw, 0.0f,1.0f,0.0f);
+				GL11.glRotated(ent.pitch, 0.0f,0.0f,1.0f);
 				GL11.glScaled(0.1f, 0.1f, 0.1f);
 				kinoModel.draw(ent);
 				GL11.glPopMatrix();

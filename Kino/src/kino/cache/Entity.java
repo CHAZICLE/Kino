@@ -2,8 +2,6 @@ package kino.cache;
 
 import java.util.Iterator;
 
-import org.lwjgl.util.vector.Matrix;
-
 import kino.cache.BB.BoundingBox;
 import kino.client.gui.GUIGameView;
 import kino.util.Vector3d;
@@ -29,8 +27,8 @@ public class Entity {
 	public Vector3d position = new Vector3d();
 	public Vector3d motion = new Vector3d();
 	public double mass = 1;
-	public double vertRot = 0;
-	public double horzRot = 0;
+	public double pitch = 0;
+	public double yaw = 0;
 	
 	private double E = 0.9;
 	/*

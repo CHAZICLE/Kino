@@ -77,12 +77,12 @@ public class RenderUtils {
 	{
 		activeShader.sendView(view_RenderEntityCache);
 	}
-	public static void setViewParameters_RenderEntity(double x, double y, double z, double vertRot, double horzRot)
+	public static void setViewParameters_RenderEntity(double x, double y, double z, double pitch, double yaw)
 	{
 		view_RenderEntityCache.setIdentity();
-		view_RenderEntityCache.rotate((float) Math.toRadians(-vertRot), X_AXIS);
-		view_RenderEntityCache.rotate((float) Math.toRadians(180-horzRot), Y_AXIS);
-		temp.setX((float)-x); temp.setY((float)-y); temp.setZ((float)-z);
+		view_RenderEntityCache.rotate((float) Math.toRadians(-pitch), X_AXIS);
+		view_RenderEntityCache.rotate((float) Math.toRadians(yaw+90), Y_AXIS);
+		temp.setX((float)-x); temp.setY((float)-y); temp.setZ((float)z);
 		view_RenderEntityCache.translate(temp);
 		
 		

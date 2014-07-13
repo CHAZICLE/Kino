@@ -4,13 +4,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import kino.client.controls.io.CInputHolder;
 import kino.client.controls.io.CInputScanner;
 import kino.client.controls.io.COutputHolder;
+import kino.client.controls.mappings.BasicAnalogControlBinding;
 import kino.client.controls.mappings.DigitalIncrementalAnalogControlBinding;
 
 import org.lwjgl.input.Keyboard;
@@ -85,7 +85,7 @@ public class ControlsManager {
 	public static void registerOutputHolder(COutputHolder controlOutputHolder) {
 		synchronized (outputHolders) {
 			outputHolders.put(controlOutputHolder.getName(), controlOutputHolder);
-		}/*
+		}
 		Iterator<ControlProfile> api = inactiveProfiles.iterator();
 		while (api.hasNext()) {
 			ControlProfile cp = api.next();
@@ -95,7 +95,7 @@ public class ControlsManager {
 				cp.loadBindings();
 				activeProfiles.add(cp);
 			}
-		}*/
+		}
 	}
 
 	public static void unregisterOutputHolder(COutputHolder controlOutputHolder) {
@@ -152,8 +152,8 @@ public class ControlsManager {
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	private static List<ControlProfile> inactiveProfiles = new LinkedList<>();
-	private static List<ControlProfile> activeProfiles = new LinkedList<>();
+	private static List<ControlProfile> inactiveProfiles = new ArrayList<>();
+	private static List<ControlProfile> activeProfiles = new ArrayList<>();
 
 	public static void loadProfiles() {
 		File files = new File("./res/profiles");
@@ -165,12 +165,12 @@ public class ControlsManager {
 	}
 
 	public static void checkProfiles() {
-		//TODO: Spread this out over control ticks a bit
 		for(int i=0;i<inactiveProfiles.size();i++)
 		{
 			ControlProfile cp = inactiveProfiles.get(i);
 			if(cp.checkDependencies())
 			{
+				System.out.println("Profile "+cp+" wasn't loaded automatically");
 				cp.loadBindings();
 				inactiveProfiles.remove(cp);
 				activeProfiles.add(cp);
@@ -182,6 +182,7 @@ public class ControlsManager {
 			ControlProfile cp = activeProfiles.get(i);
 			if(!cp.checkDependencies())
 			{
+				System.out.println("Profile "+cp+" wasn't unloaded automatically");
 				activeProfiles.remove(cp);
 				inactiveProfiles.add(cp);
 				continue;
@@ -198,18 +199,19 @@ public class ControlsManager {
 		scanForNewInputHolders();
 		
 		ControlProfile cp = new ControlProfile("Testing Kino Bindings");
-		CInputHolder cih = ControlsManager.getInputHolder("Keyboard");
-		COutputHolder coh = ControlsManager.getOutputHolder("Kino 1");
+		CInputHolder keyboard = ControlsManager.getInputHolder("Keyboard");
+		CInputHolder mouse = ControlsManager.getInputHolder("Mouse");
+		COutputHolder kino = ControlsManager.getOutputHolder("Kino 1");
 		
-		System.out.println("CInputHolder="+cih.getName());
-		System.out.println("COutputHolder="+coh.getName());
+		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, 1, keyboard.getDigitalInput(Keyboard.KEY_W), kino.getAnalogOutput(6)));
+		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, -1, keyboard.getDigitalInput(Keyboard.KEY_S), kino.getAnalogOutput(6)));
+		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, 1, keyboard.getDigitalInput(Keyboard.KEY_A), kino.getAnalogOutput(4)));
+		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, -1, keyboard.getDigitalInput(Keyboard.KEY_D), kino.getAnalogOutput(4)));
+		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, 1, keyboard.getDigitalInput(Keyboard.KEY_E), kino.getAnalogOutput(5)));
+		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, -1, keyboard.getDigitalInput(Keyboard.KEY_Q), kino.getAnalogOutput(5)));
+		cp.addBinding(new BasicAnalogControlBinding(0,1,0,mouse.getAnalogInput(2),kino.getAnalogOutput(7)));
+		cp.addBinding(new BasicAnalogControlBinding(0,1,0,mouse.getAnalogInput(3),kino.getAnalogOutput(8)));
 		
-		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, 1, cih.getDigitalInput(Keyboard.KEY_A), coh.getAnalogOutput(0)));
-		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, -1, cih.getDigitalInput(Keyboard.KEY_D), coh.getAnalogOutput(0)));
-		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, 1, cih.getDigitalInput(Keyboard.KEY_W), coh.getAnalogOutput(1)));
-		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, -1, cih.getDigitalInput(Keyboard.KEY_S), coh.getAnalogOutput(1)));
-		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, 1, cih.getDigitalInput(Keyboard.KEY_E), coh.getAnalogOutput(2)));
-		cp.addBinding(new DigitalIncrementalAnalogControlBinding(false, -1, cih.getDigitalInput(Keyboard.KEY_Q), coh.getAnalogOutput(2)));
 		inactiveProfiles.add(cp);
 		
 		//checkProfiles();

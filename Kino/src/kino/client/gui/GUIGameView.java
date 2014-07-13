@@ -170,8 +170,8 @@ public class GUIGameView extends GUI {
 				renderEntity.position.getX(),
 				renderEntity.position.getY(),
 				renderEntity.position.getZ(),
-				renderEntity.vertRot,
-				renderEntity.horzRot
+				renderEntity.pitch,
+				renderEntity.yaw
 			);
 		}
 		RenderUtils.sendViewParameters_RenderEntity();
@@ -180,7 +180,7 @@ public class GUIGameView extends GUI {
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		
 		// Debug Rendering
-		if(debugAxisGrid)
+//		if(debugAxisGrid)
 			RenderDebug.renderAxisMarks();
 		//RenderDebug.renderCube();
 		RenderDebug.renderFloor();

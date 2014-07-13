@@ -46,10 +46,8 @@ public class DigitalIncrementalAnalogControlBinding extends ControlBinding {
 	
 	@Override
 	public void tickRaw() {
-		System.out.println("TICKING");
 		if(inverted!=input.getCurrentState())
 		{
-			System.out.println("POSTING"+value);
 			output.post(value);
 		}
 	}
